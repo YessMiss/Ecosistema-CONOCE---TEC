@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONOCE-TEC - Registro de Administrador</title>
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles-registro.css">
+    <style>
+        .registro-card { border-top: 5px solid #1e2a5a; }
+        .registro-header { background: linear-gradient(135deg, #1e2a5a 0%, #2d4499 100%); }
+        .registro-title { color: #fff; }
+        .registro-subtitle { color: rgba(255,255,255,0.8); }
+        .input-icon { color: #1e2a5a; }
+        .btn-registro {
+            background: linear-gradient(135deg, #1e2a5a 0%, #2d4499 100%);
+            border: none;
+        }
+        .btn-registro:hover { background: linear-gradient(135deg, #162044 0%, #233580 100%); }
+        .admin-badge-reg {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(30,42,90,0.08); color: #1e2a5a;
+            border-radius: 20px; padding: 5px 14px; font-size: .82rem;
+            font-weight: 700; letter-spacing: .04em; margin-bottom: 8px;
+        }
+        .rol-select-wrapper { position: relative; }
+        .rol-select-wrapper select {
+            appearance: none; -webkit-appearance: none;
+            width: 100%; padding: 12px 16px 12px 48px;
+            border: 2px solid #e2e8f0; border-radius: 12px;
+            font-size: .95rem; color: #1e293b;
+            background: #fff; cursor: pointer;
+            transition: border-color .2s;
+        }
+        .rol-select-wrapper select:focus {
+            outline: none; border-color: #1e2a5a;
+            box-shadow: 0 0 0 3px rgba(30,42,90,0.1);
+        }
+        .rol-select-wrapper .input-icon {
+            position: absolute; left: 14px; top: 50%;
+            transform: translateY(-50%); pointer-events: none;
+        }
+        .foto-upload-wrap {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 10px; padding: 18px; border: 2px dashed #b0bec5;
+            border-radius: 16px; cursor: pointer; transition: border-color .2s;
+            background: #f8fafc;
+        }
+        .foto-upload-wrap:hover { border-color: #1e2a5a; background: #eef2ff; }
+        .foto-preview {
+            width: 90px; height: 90px; border-radius: 50%;
+            object-fit: cover; border: 3px solid #1e2a5a;
+            display: none;
+        }
+        .foto-icon-placeholder {
+            width: 90px; height: 90px; border-radius: 50%;
+            background: #e8eaf6; display: flex; align-items: center;
+            justify-content: center; font-size: 2.5rem; color: #9e9e9e;
+        }
+        .foto-upload-label { font-size: .85rem; color: #64748b; text-align: center; }
+        #fotoInput { display: none; }
+    </style>
+</head>
+<body>
+    <header class="header-section">
+        <div class="container-fluid">
+            <div class="row align-items-center py-3 px-4">
+                <div class="col-auto">
+                    <div class="logo-circle">
+                        <span class="logo-text">CT</span>
+                    </div>
+                </div>
+                <div class="col">
+                    <h1 class="header-title">CONOCE-TEC</h1>
+                    <p class="header-subtitle">Explorando el Instituto Tecnológico de Minatitlán</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="banner-section">
+        <img src="../img/banner-profesionales.png" alt="Profesionales" class="banner-image">
+        <div class="banner-overlay"></div>
+    </section>
+
+    <main class="main-section-registro">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-10">
+                    <div class="registro-card">
+                        <div class="registro-header">
+                            <div class="text-center mb-1">
+                                <span class="admin-badge-reg" style="background:rgba(255,255,255,0.15);color:#fff;">
+                                    <i class="fas fa-shield-alt"></i> Acceso Administrativo
+                                </span>
+                            </div>
+                            <h2 class="registro-title">Registro de Administrador</h2>
+                            <p class="registro-subtitle">Crea una cuenta de administrador para gestionar el sistema.</p>
+                        </div>
+
+                        <form id="formRegistroAdmin" class="registro-form">
+
+                            <!-- Foto de perfil -->
+                            <div class="form-group-custom">
+                                <label style="font-size:.85rem;font-weight:600;color:#374151;margin-bottom:8px;display:block;">
+                                    <i class="fas fa-camera me-1" style="color:#1e2a5a;"></i> Foto de Perfil (opcional)
+                                </label>
+                                <div class="foto-upload-wrap" id="fotoUploadWrap" onclick="document.getElementById('fotoInput').click()">
+                                    <div class="foto-icon-placeholder" id="fotoIconPlaceholder">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <img id="fotoPreview" class="foto-preview" src="" alt="Vista previa">
+                                    <span class="foto-upload-label">
+                                        <i class="fas fa-cloud-upload-alt me-1"></i>
+                                        Haz clic para subir una foto<br>
+                                        <small>JPG, PNG o GIF (máx. 5MB)</small>
+                                    </span>
+                                </div>
+                                <input type="file" id="fotoInput" accept="image/*">
+                            </div>
+
+                            <!-- Nombre Completo -->
+                            <div class="form-group-custom">
+                                <div class="input-group-custom">
+                                    <span class="input-icon"><i class="fas fa-user"></i></span>
+                                    <input type="text" class="input-custom" id="nombreCompleto" placeholder="Nombre Completo" required>
+                                </div>
+                                <small class="error-message" id="errorNombre"></small>
+                            </div>
+
+                            <!-- Correo Institucional -->
+                            <div class="form-group-custom">
+                                <div class="input-group-custom">
+                                    <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                                    <input type="email" class="input-custom" id="correoInstitucional" placeholder="Correo Institucional (@tec.edu.mx)">
+                                </div>
+                                <small class="error-message" id="errorCorreo"></small>
+                            </div>
+
+                            <!-- Número de Empleado / ID -->
+                            <div class="form-group-custom">
+                                <div class="input-group-custom">
+                                    <span class="input-icon"><i class="fas fa-id-badge"></i></span>
+                                    <input type="text" class="input-custom" id="numEmpleado" placeholder="Número de Empleado / ID" maxlength="20" required>
+                                </div>
+                                <small class="error-message" id="errorEmpleado"></small>
+                            </div>
+
+                            <!-- Área o Departamento -->
+                            <div class="form-group-custom">
+                                <div class="input-group-custom">
+                                    <span class="input-icon"><i class="fas fa-building"></i></span>
+                                    <input type="text" class="input-custom" id="areaDepartamento" placeholder="Área o Departamento" required>
+                                </div>
+                                <small class="error-message" id="errorArea"></small>
+                            </div>
+
+                            <!-- Rol -->
+                            <div class="form-group-custom">
+                                <div class="rol-select-wrapper">
+                                    <span class="input-icon"><i class="fas fa-user-shield"></i></span>
+                                    <select id="rolAdmin" required>
+                                        <option value="">Selecciona un rol</option>
+                                        <option value="Administrador">Administrador</option>
+                                        <option value="Editor">Editor</option>
+                                        <option value="Supervisor">Supervisor</option>
+                                        <option value="Soporte Técnico">Soporte Técnico</option>
+                                    </select>
+                                </div>
+                                <small class="error-message" id="errorRol"></small>
+                            </div>
+
+                            <!-- Usuario -->
+                            <div class="form-group-custom">
+                                <div class="input-group-custom">
+                                    <span class="input-icon"><i class="fas fa-at"></i></span>
+                                    <input type="text" class="input-custom" id="usuarioAdmin" placeholder="Nombre de usuario" required>
+                                </div>
+                                <small class="error-message" id="errorUsuario"></small>
+                            </div>
+
+                            <!-- Contraseña -->
+                            <div class="form-group-custom">
+                                <div class="input-group-custom">
+                                    <span class="input-icon"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="input-custom" id="passwordAdmin" placeholder="Contraseña (mín. 8 caracteres)" maxlength="30" required>
+                                    <button type="button" class="toggle-password-btn" data-target="passwordAdmin" tabindex="-1">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small class="error-message" id="errorPassword"></small>
+                            </div>
+
+                            <!-- Confirmar Contraseña -->
+                            <div class="form-group-custom">
+                                <div class="input-group-custom">
+                                    <span class="input-icon"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="input-custom" id="confirmarPassword" placeholder="Confirmar contraseña" maxlength="30" required>
+                                    <button type="button" class="toggle-password-btn" data-target="confirmarPassword" tabindex="-1">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small class="error-message" id="errorConfirmar"></small>
+                            </div>
+
+                            <!-- Clave de acceso admin -->
+                            <div class="form-group-custom">
+                                <div class="input-group-custom">
+                                    <span class="input-icon"><i class="fas fa-key"></i></span>
+                                    <input type="password" class="input-custom" id="claveAdmin" placeholder="Clave de acceso administrativo" required>
+                                    <button type="button" class="toggle-password-btn" data-target="claveAdmin" tabindex="-1">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small class="helper-text" style="color:#64748b;font-size:.78rem;margin-top:4px;display:block;">
+                                    <i class="fas fa-info-circle me-1"></i>Esta clave es proporcionada por el responsable del sistema.
+                                </small>
+                                <small class="error-message" id="errorClave"></small>
+                            </div>
+
+                            <button type="submit" class="btn-registro" id="btnRegistrarAdmin">
+                                <i class="fas fa-shield-alt me-2"></i> Registrar Administrador
+                            </button>
+
+                            <div class="login-redirect mt-3 text-center">
+                                <p>¿Ya tienes cuenta? 
+                                    <a href="../index.html" class="link-registro" style="color:#1e2a5a;">Inicia sesión aquí</a>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // =============================================
+    // REGISTRO ADMIN - Script
+    // =============================================
+
+    // Clave maestra para registrar admins (en prod debería ser del servidor)
+    const CLAVE_MAESTRA_ADMIN = 'conocetec2024';
+
+    // Vista previa de foto
+    const fotoInput = document.getElementById('fotoInput');
+    const fotoPreview = document.getElementById('fotoPreview');
+    const fotoIconPlaceholder = document.getElementById('fotoIconPlaceholder');
+
+    fotoInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+            alert('La imagen es muy grande. Máximo 5MB.'); return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            fotoPreview.src = e.target.result;
+            fotoPreview.style.display = 'block';
+            fotoIconPlaceholder.style.display = 'none';
+            localStorage.setItem('adminFotoPerfil', e.target.result);
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Toggle password
+    document.querySelectorAll('.toggle-password-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const input = document.getElementById(this.getAttribute('data-target'));
+            const icon = this.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        });
+    });
+
+    function mostrarError(id, msg) {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = msg; el.style.color = '#ef4444'; }
+    }
+    function limpiarError(id) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = '';
+    }
+
+    document.getElementById('formRegistroAdmin').addEventListener('submit', function(e) {
+        e.preventDefault();
+        let valido = true;
+
+        const nombre = document.getElementById('nombreCompleto').value.trim();
+        const correo = document.getElementById('correoInstitucional').value.trim();
+        const numEmp = document.getElementById('numEmpleado').value.trim();
+        const area   = document.getElementById('areaDepartamento').value.trim();
+        const rol    = document.getElementById('rolAdmin').value;
+        const usuario= document.getElementById('usuarioAdmin').value.trim();
+        const pass   = document.getElementById('passwordAdmin').value;
+        const conf   = document.getElementById('confirmarPassword').value;
+        const clave  = document.getElementById('claveAdmin').value;
+
+        ['errorNombre','errorCorreo','errorEmpleado','errorArea','errorRol','errorUsuario','errorPassword','errorConfirmar','errorClave'].forEach(limpiarError);
+
+        if (nombre.length < 3) { mostrarError('errorNombre','Ingresa tu nombre completo.'); valido=false; }
+        if (numEmp.length < 2) { mostrarError('errorEmpleado','Ingresa tu número de empleado.'); valido=false; }
+        if (area.length < 2)   { mostrarError('errorArea','Ingresa tu área o departamento.'); valido=false; }
+        if (!rol)              { mostrarError('errorRol','Selecciona un rol.'); valido=false; }
+        if (usuario.length < 3){ mostrarError('errorUsuario','El usuario debe tener al menos 3 caracteres.'); valido=false; }
+        if (pass.length < 8)   { mostrarError('errorPassword','La contraseña debe tener al menos 8 caracteres.'); valido=false; }
+        if (pass !== conf)     { mostrarError('errorConfirmar','Las contraseñas no coinciden.'); valido=false; }
+        if (clave !== CLAVE_MAESTRA_ADMIN) { mostrarError('errorClave','Clave de acceso incorrecta.'); valido=false; }
+
+        if (!valido) return;
+
+        const btn = document.getElementById('btnRegistrarAdmin');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Registrando...';
+
+        setTimeout(function() {
+            // Guardar datos del admin en localStorage
+            const adminData = {
+                nombreCompleto: nombre,
+                correoInstitucional: correo,
+                numEmpleado: numEmp,
+                areaDepartamento: area,
+                rol: rol,
+                usuario: usuario,
+                registrado: new Date().toISOString()
+            };
+            localStorage.setItem('adminData', JSON.stringify(adminData));
+            localStorage.setItem('adminUsuario', usuario);
+            localStorage.setItem('adminPassword', pass);
+            localStorage.setItem('nombreUsuarioActual', nombre);
+
+            // Iniciar sesión como admin automáticamente
+            sessionStorage.setItem('tipoUsuario', 'admin');
+            sessionStorage.setItem('rolUsuario', 'admin');
+            sessionStorage.setItem('usuarioActual', usuario);
+            sessionStorage.setItem('nombreUsuario', nombre);
+            sessionStorage.setItem('horaLogin', new Date().toLocaleTimeString());
+
+            btn.innerHTML = '<i class="fas fa-check me-2"></i>¡Registrado!';
+            btn.style.background = '#10b981';
+
+            setTimeout(function() {
+                window.location.href = 'dashboard-admin.html';
+            }, 1200);
+        }, 1200);
+    });
+    </script>
+</body>
+</html>

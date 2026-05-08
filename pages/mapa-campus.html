@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Mapa del Campus - ITMI</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.1/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.1/dist/MarkerCluster.Default.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Estilos del sistema de reportes y mejoras del mapa -->
+  <link rel="stylesheet" href="../map/css/waze_reports.css" />
+  <link rel="stylesheet" href="../map/css/waze_dark_mode.css" />
+  <link rel="stylesheet" href="../map/css/styles_mejoras.css" />
+  <style>
+    /* ======== RESET & BASE ======== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; width: 100%; overflow: hidden; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; }
+
+    #map-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ======== BARRA DE BÚSQUEDA SUPERIOR ======== */
+    #map-topbar {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 900;
+      width: min(480px, calc(100% - 24px));
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    #map-search-input {
+      flex: 1;
+      padding: 10px 16px 10px 40px;
+      border: none;
+      border-radius: 24px;
+      font-size: 14px;
+      background: white;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+      outline: none;
+    }
+    #map-topbar .search-icon {
+      position: absolute;
+      left: 14px;
+      color: #888;
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    #map-search-results {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      max-height: 280px;
+      overflow-y: auto;
+      display: none;
+      z-index: 950;
+    }
+    #map-search-results.open { display: block; }
+
+    .search-result-item {
+      padding: 10px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.15s;
+    }
+    .search-result-item:last-child { border-bottom: none; }
+    .search-result-item:hover { background: #f0f7ff; }
+    .search-result-item .sri-icon {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: #e8f4fd; color: #3498db; font-size: 12px; flex-shrink: 0;
+    }
+    .search-result-item .sri-name { font-weight: 500; font-size: 13px; color: #2c3e50; }
+    .search-result-item .sri-cat { font-size: 11px; color: #888; }
+
+    /* ======== MAPA ======== */
+    #map { width: 100%; height: 100%; }
+
+    /* ======== BOTÓN UBICACIÓN ======== */
+    #btn-my-location {
+      position: absolute;
+      bottom: 100px;
+      right: 14px;
+      z-index: 800;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: #3498db;
+      transition: background 0.2s;
+    }
+    #btn-my-location:hover { background: #ebf5fb; }
+
+    /* ======== TARJETA DE POI (aparece al hacer click en marcador) ======== */
+    #poi-card {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: white;
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+      z-index: 800;
+      padding: 8px 20px 24px;
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+      max-height: 65vh;
+      overflow-y: auto;
+    }
+    #poi-card.visible { transform: translateY(0); }
+
+    .poi-card-handle {
+      width: 40px; height: 4px; background: #ddd; border-radius: 2px;
+      margin: 10px auto 14px;
+    }
+    .poi-card-header {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+      margin-bottom: 12px;
+    }
+    .poi-card-title-group { flex: 1; }
+    .poi-card-name { font-size: 18px; font-weight: 700; color: #2c3e50; margin-bottom: 4px; }
+    .poi-card-category {
+      display: inline-block; padding: 3px 10px; border-radius: 12px;
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      background: #e8f4fd; color: #3498db;
+    }
+    .poi-card-close {
+      background: #f5f5f5; border: none; border-radius: 50%;
+      width: 32px; height: 32px; cursor: pointer; font-size: 14px;
+      color: #888; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .poi-card-close:hover { background: #e0e0e0; }
+
+    /* Galería de imágenes */
+    .poi-card-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .poi-card-gallery img {
+      width: 100%; height: 100px; object-fit: cover;
+      border-radius: 10px; cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .poi-card-gallery img:hover { transform: scale(1.03); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+
+    .poi-card-desc { font-size: 13px; color: #555; line-height: 1.5; margin-bottom: 16px; }
+
+    .poi-card-actions { display: flex; gap: 10px; }
+    .btn-poi-ruta, .btn-poi-cerrar {
+      flex: 1; padding: 12px; border: none; border-radius: 12px;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-poi-ruta { background: linear-gradient(135deg, #3498db, #2980b9); color: white; }
+    .btn-poi-ruta:hover { background: linear-gradient(135deg, #2980b9, #1a6ca8); transform: translateY(-1px); }
+    .btn-poi-cerrar { background: #f0f0f0; color: #555; }
+    .btn-poi-cerrar:hover { background: #e0e0e0; }
+
+    /* ======== PANEL DE RUTA ======== */
+    #route-panel {
+      position: absolute;
+      top: 70px; left: 12px; right: 12px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      z-index: 850;
+      padding: 14px 16px;
+      display: none;
+    }
+    #route-panel.visible { display: block; }
+
+    .route-panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .route-panel-title { font-weight: 700; font-size: 14px; color: #2c3e50; }
+    .route-panel-close {
+      background: none; border: none; cursor: pointer; color: #888; font-size: 16px;
+    }
+    .route-panel-info { display: flex; gap: 20px; font-size: 13px; color: #555; }
+    .route-panel-info span { display: flex; align-items: center; gap: 5px; }
+    .route-panel-info i { color: #3498db; }
+    .route-panel-dest {
+      margin-top: 8px; font-size: 12px; color: #888;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* ======== MODAL DE IMAGEN AMPLIADA ======== */
+    #img-modal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.92); z-index: 9999;
+      align-items: center; justify-content: center;
+    }
+    #img-modal.open { display: flex; }
+    #img-modal img {
+      max-width: 92vw; max-height: 88vh; border-radius: 8px;
+      object-fit: contain; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    #img-modal-close {
+      position: absolute; top: 16px; right: 20px;
+      color: white; font-size: 36px; cursor: pointer; line-height: 1;
+      background: rgba(0,0,0,0.4); border-radius: 50%;
+      width: 44px; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #img-modal-close:hover { background: rgba(231,76,60,0.7); }
+
+    /* ======== ESTILOS LEAFLET POPUP ======== */
+    .leaflet-popup-content { padding: 0 !important; margin: 0 !important; }
+    .leaflet-popup-content-wrapper { border-radius: 12px !important; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.15) !important; }
+
+    .popup-mini {
+      min-width: 160px;
+      padding: 12px 14px;
+      text-align: center;
+    }
+    .popup-mini .pm-name { font-weight: 700; font-size: 13px; color: #2c3e50; margin-bottom: 4px; }
+    .popup-mini .pm-cat { font-size: 11px; color: #888; margin-bottom: 8px; }
+    .popup-mini .pm-btn {
+      background: #3498db; color: white; border: none;
+      border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 600;
+      cursor: pointer; width: 100%;
+    }
+    .popup-mini .pm-btn:hover { background: #2980b9; }
+
+    /* ======== MARCADOR DE USUARIO ======== */
+    .user-dot {
+      width: 16px; height: 16px;
+      background: #3498db;
+      border: 3px solid white;
+      border-radius: 50%;
+      box-shadow: 0 0 0 4px rgba(52,152,219,0.3);
+    }
+
+    /* ======== MARCADOR DE DESTINO ======== */
+    .dest-pin {
+      font-size: 30px; color: #e74c3c;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      animation: bounce-pin 1s ease-in-out infinite alternate;
+    }
+    @keyframes bounce-pin {
+      from { transform: translateY(0); }
+      to { transform: translateY(-6px); }
+    }
+
+    /* ======== CHIP DE CATEGORÍAS ======== */
+    #category-chips {
+      position: absolute;
+      top: 68px; left: 0; right: 0;
+      padding: 0 12px;
+      display: flex; gap: 8px; overflow-x: auto;
+      z-index: 800;
+      scrollbar-width: none;
+    }
+    #category-chips::-webkit-scrollbar { display: none; }
+
+    .cat-chip {
+      white-space: nowrap;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: none;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      transition: all 0.2s;
+      color: #444;
+    }
+    .cat-chip:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .cat-chip.active { color: white; }
+    .cat-chip.active[data-cat="Todos"] { background: #2c3e50; }
+    .cat-chip.active[data-cat="Edificio"] { background: #3498db; }
+    .cat-chip.active[data-cat="Laboratorio"] { background: #9b59b6; }
+    .cat-chip.active[data-cat="Biblioteca"] { background: #e67e22; }
+    .cat-chip.active[data-cat="Cafetería"] { background: #e74c3c; }
+    .cat-chip.active[data-cat="Deportes"] { background: #27ae60; }
+
+    /* ======== TOAST ======== */
+    #map-toast {
+      position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: #2c3e50; color: white;
+      padding: 10px 20px; border-radius: 24px;
+      font-size: 13px; font-weight: 500;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      z-index: 1000; opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      white-space: nowrap;
+    }
+    #map-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ======== RESPONSIVE ======== */
+    @media (min-width: 640px) {
+      #poi-card {
+        bottom: 20px; left: 20px; right: auto;
+        width: 340px; border-radius: 20px;
+        transform: translateX(-120%);
+        transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+      }
+      #poi-card.visible { transform: translateX(0); }
+      .poi-card-handle { display: none; }
+
+      #route-panel {
+        top: 70px; left: 12px; right: auto;
+        width: 340px;
+      }
+
+      #category-chips { top: 68px; }
+    }
+  </style>
+</head>
+<body>
+<div id="map-wrapper">
+
+  <!-- Mapa Leaflet -->
+  <div id="map"></div>
+
+  <!-- Barra de búsqueda superior -->
+  <div id="map-topbar">
+    <i class="fas fa-search search-icon"></i>
+    <input type="text" id="map-search-input" placeholder="Buscar edificio o lugar…" autocomplete="off" />
+    <div id="map-search-results"></div>
+  </div>
+
+  <!-- Chips de categorías -->
+  <div id="category-chips">
+    <button class="cat-chip active" data-cat="Todos"><i class="fas fa-th"></i> Todos</button>
+    <button class="cat-chip" data-cat="Edificio"><i class="fas fa-building"></i> Edificios</button>
+    <button class="cat-chip" data-cat="Laboratorio"><i class="fas fa-flask"></i> Laboratorios</button>
+    <button class="cat-chip" data-cat="Biblioteca"><i class="fas fa-book"></i> Biblioteca</button>
+    <button class="cat-chip" data-cat="Cafetería"><i class="fas fa-utensils"></i> Cafetería</button>
+    <button class="cat-chip" data-cat="Deportes"><i class="fas fa-running"></i> Deportes</button>
+  </div>
+
+  <!-- Botón mi ubicación -->
+  <button id="btn-my-location" title="Mi ubicación">
+    <i class="fas fa-location-arrow"></i>
+  </button>
+
+  <!-- Panel de ruta -->
+  <div id="route-panel">
+    <div class="route-panel-header">
+      <span class="route-panel-title"><i class="fas fa-route" style="color:#3498db;margin-right:6px;"></i>Ruta calculada</span>
+      <button class="route-panel-close" id="route-panel-close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="route-panel-info">
+      <span><i class="fas fa-ruler"></i> <b id="rp-dist">—</b></span>
+      <span><i class="fas fa-clock"></i> <b id="rp-time">—</b></span>
+    </div>
+    <div class="route-panel-dest" id="rp-dest">—</div>
+  </div>
+
+  <!-- Tarjeta de POI -->
+  <div id="poi-card">
+    <div class="poi-card-handle"></div>
+    <div class="poi-card-header">
+      <div class="poi-card-title-group">
+        <div class="poi-card-name" id="poc-name">Edificio</div>
+        <span class="poi-card-category" id="poc-cat">Categoría</span>
+      </div>
+      <button class="poi-card-close" id="poc-close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="poi-card-gallery" id="poc-gallery"></div>
+    <div class="poi-card-desc" id="poc-desc"></div>
+    <div class="poi-card-actions">
+      <button class="btn-poi-ruta" id="poc-btn-ruta">
+        <i class="fas fa-route"></i> Ir aquí
+      </button>
+      <button class="btn-poi-cerrar" id="poc-btn-cerrar">
+        <i class="fas fa-times"></i> Cerrar
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="map-toast"></div>
+
+  <!-- Modal imagen ampliada -->
+  <div id="img-modal">
+    <div id="img-modal-close">&#x2715;</div>
+    <img id="img-modal-src" src="" alt="Imagen ampliada" />
+  </div>
+</div>
+
+<!-- Leaflet + Plugins -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.1/dist/leaflet.markercluster.js"></script>
+<script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js"></script>
+
+<script>
+// ============================================================
+//  CONFIGURACIÓN
+// ============================================================
+const CAMPUS_BBOX = [-94.5579, 18.0051, -94.5541, 18.0069]; // [minLon, minLat, maxLon, maxLat]
+const WALKING_SPEED = 1.4; // m/s
+
+// Imágenes por edificio (rutas relativas a /map/images/)
+const BUILDING_IMAGES = {
+  "Cafetería":          ["images/Cafeteria/Cafeteria_1.jpg","images/Cafeteria/CAFETERIA_2.jpg"],
+  "Domo":               ["images/Domo/Domo_1.jpg","images/Domo/Domo_2.jpg","images/Domo/DOMO_3.jpg"],
+  "Edificio A":         ["images/EDIFICIO A/A_1.jpg","images/EDIFICIO A/A_2.jpg"],
+  "Edificio AC":        ["images/EDIFICIO AC/AC_1.jpg"],
+  "Edificio ACA":       ["images/EDIFICIO ACA/ACA_1.jpg","images/EDIFICIO ACA/ACA_2.jpg"],
+  "Edificio ACB":       ["images/EDIFICIO ACB/ACB_1.jpg","images/EDIFICIO ACB/ACB_2.jpg"],
+  "Edificio B":         ["images/EDIFICIO B/B_1.jpg"],
+  "Edificio C":         ["images/EDIFICIO C/C_1.jpg","images/EDIFICIO C/C_2.jpg"],
+  "Edificio CI":        ["images/EDIFICIO CI/INGLES.jpg"],
+  "Edificio D":         ["images/EDIFICIO D/D_1.jpg"],
+  "Edificio E":         ["images/EDIFICIO E/E_1.jpg","images/EDIFICIO E/E_2.jpg"],
+  "Edificio F":         ["images/EDIFICIO F/F_1.jpg","images/EDIFICIO F/F_2.jpg","images/EDIFICIO F/F_3.jpg"],
+  "Edificio G":         ["images/EDIFICIO G/G_1.jpg","images/EDIFICIO G/G_2.jpg","images/EDIFICIO G/G_3.jpg"],
+  "Edificio H":         ["images/EDIFICIO H/H_1.jpg"],
+  "Edificio I":         ["images/EDIFICIO I/I_1.jpg","images/EDIFICIO I/I_2.jpg","images/EDIFICIO I/I_3.jpg"],
+  "Edificio J":         ["images/EDIFICIO J/J_1.jpg","images/EDIFICIO J/J_2.jpg"],
+  "Edificio LAI":       ["images/EDIFICIO LAI/LAI_1.jpg","images/EDIFICIO LAI/LAI_2.jpg"],
+  "Edificio LCI":       ["images/EDIFICIO LCI/LC(SUM)_1.jpg","images/EDIFICIO LCI/LC(TallElMec)_2.jpg","images/EDIFICIO LCI/LC_3.jpg"],
+  "Edificio LIE-1":     ["images/EDIFICIO LIE-1/LI1.jpg"],
+  "Edificio LIE-2":     ["images/EDIFICIO LIE-2/LI2.jpg"],
+  "Edificio LIEM":      ["images/EDIFICIO LIEM/LIEM_1.jpg"],
+  "Edificio LIQP":      ["images/EDIFICIO LIQP/LIQP_1.jpg"],
+  "Edificio LISC":      ["images/EDIFICIO LISC/LISC(ISC)_1.jpg","images/EDIFICIO LISC/LISC(ISC)_2.jpg"],
+  "Edificio LQG":       ["images/EDIFICIO LQG/LQG_1.jpg"],
+  "Edificio O":         ["images/EDIFICIO O/O(Biblioteca)_1.jpg","images/EDIFICIO O/O(BIBLIOTECA)_2.jpg","images/EDIFICIO O/O(BibliOteca)_3.jpg"],
+  "Edificio V":         ["images/EDIFICIO V/V_1.jpg"],
+  "Edificio de LII":    ["images/Edificio de LII/Edificio LII.jpg"],
+  "Edificio CECT":      ["images/Edificio CECT/CECT(UAD)_1.jpg","images/Edificio CECT/CECT(UAD)_2.jpg"],
+  "Edificio DPI":       ["images/Edificio DPI/DPI(PosGrado)_1.jpg","images/Edificio DPI/DPI_2.jpg","images/Edificio DPI/DPI_3.jpg"],
+  "Palapa":             ["images/PALAPA/Palapa_1.jpg"],
+  "Entrada Lateral":    ["images/ENTRADA LATERAL/Entrada  Lateral.jpg"]
+};
+
+const ALLOWED_BUILDINGS = [
+  "Edificio LISC","Edificio H","Edificio G","Edificio LIE-2","Edificio LIE-1",
+  "Edificio CECT","Edificio O","Edificio J","Edificio I","Edificio de LII",
+  "Edificio E","Edificio CI","Edificio D","Edificio C","Edificio F",
+  "Edificio DPI","Edificio LQG","Edificio UVMA","Edificio AC","Edificio ACB",
+  "Edificio ACA","Edificio B","Edificio A","Edificio LIQP","Edificio LCI",
+  "Edificio LIEM","Edificio LAI","Edificio V","Edificio S.G","Edificio X",
+  "Palapa","Domo","Cafetería","Subestación Eléctrica"
+];
+
+// ============================================================
+//  ESTADO GLOBAL
+// ============================================================
+var map, markerClusterGroup;
+var userMarker = null, watchId = null, lastUserCoord = null;
+var destMarker = null, currentRouteLine = null;
+var routesGeo, poisGeo, fuseIndex;
+var graph = { nodes:{}, coordsToId:{}, adj:{} };
+var currentPOI = null;
+var activeCategory = "Todos";
+var allMarkers = []; // [{feature, marker}]
+
+// ============================================================
+//  INICIALIZACIÓN
+// ============================================================
+document.addEventListener("DOMContentLoaded", function() {
+  initMap();
+  loadData();
+  setupUI();
+  requestLocation();
+});
+
+function initMap() {
+  map = L.map("map", {
+    maxBounds: [
+      [CAMPUS_BBOX[1] - 0.001, CAMPUS_BBOX[0] - 0.001],
+      [CAMPUS_BBOX[3] + 0.001, CAMPUS_BBOX[2] + 0.001]
+    ],
+    maxZoom: 19,
+    minZoom: 16,
+    zoomControl: true
+  }).setView([
+    (CAMPUS_BBOX[1] + CAMPUS_BBOX[3]) / 2,
+    (CAMPUS_BBOX[0] + CAMPUS_BBOX[2]) / 2
+  ], 17);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "© OpenStreetMap contributors"
+  }).addTo(map);
+
+  markerClusterGroup = L.markerClusterGroup({
+    maxClusterRadius: 60,
+    disableClusteringAtZoom: 19
+  });
+  map.addLayer(markerClusterGroup);
+}
+
+// ============================================================
+//  CARGA DE DATOS GEOJSON
+// ============================================================
+async function loadData() {
+  // Rutas relativas a /map/data/ cuando el iframe está en pages/
+  const basePath = "../map/data/";
+  try {
+    const [rRes, pRes] = await Promise.all([
+      fetch(basePath + "campus_routes.geojson"),
+      fetch(basePath + "pois.geojson")
+    ]);
+    routesGeo = await rRes.json();
+    poisGeo   = await pRes.json();
+
+    // Filtrar solo edificios permitidos
+    poisGeo.features = poisGeo.features.filter(f =>
+      ALLOWED_BUILDINGS.includes(f.properties.name)
+    );
+
+    renderRoutes();
+    renderPOIs();
+    buildGraph();
+    setupSearch();
+
+    map.fitBounds([
+      [CAMPUS_BBOX[1], CAMPUS_BBOX[0]],
+      [CAMPUS_BBOX[3], CAMPUS_BBOX[2]]
+    ], { padding: [30, 30] });
+
+  } catch (err) {
+    console.error("Error cargando datos del mapa:", err);
+    showToast("Error cargando datos del mapa. Verifica la carpeta /map/data/");
+  }
+}
+
+// ============================================================
+//  RENDERIZADO DE RUTAS
+// ============================================================
+function renderRoutes() {
+  L.geoJson(routesGeo, {
+    style: function(f) {
+      const hw = f.properties.highway;
+      return {
+        color: "#b0b8c1",
+        weight: hw === "footway" || hw === "path" ? 2 : 3,
+        opacity: 0.6
+      };
+    }
+  }).addTo(map);
+}
+
+// ============================================================
+//  RENDERIZADO DE POIs
+// ============================================================
+function getCategory(props) {
+  const n = (props.name || "").toLowerCase();
+  if (n.includes("laboratorio") || n.includes("lab") || n.startsWith("edificio l") || n.includes("liqp") || n.includes("liem") || n.includes("lai") || n.includes("lci") || n.includes("lie") || n.includes("lisc") || n.includes("lqg") || n.includes("lii") || n.includes("lisc")) return "Laboratorio";
+  if (n.includes("biblioteca") || n.includes("edificio o")) return "Biblioteca";
+  if (n.includes("cafetería") || n.includes("cafeteria") || n.includes("comedor")) return "Cafetería";
+  if (n.includes("cancha") || n.includes("domo") || n.includes("deportes") || n.includes("palapa")) return "Deportes";
+  if (n.includes("edificio")) return "Edificio";
+  return "Servicio";
+}
+
+const CAT_CONFIG = {
+  "Edificio":     { icon: "fa-building",    color: "#3498db" },
+  "Laboratorio":  { icon: "fa-flask",       color: "#9b59b6" },
+  "Biblioteca":   { icon: "fa-book",        color: "#e67e22" },
+  "Cafetería":    { icon: "fa-utensils",    color: "#e74c3c" },
+  "Deportes":     { icon: "fa-running",     color: "#27ae60" },
+  "Servicio":     { icon: "fa-info-circle", color: "#f39c12" }
+};
+
+function renderPOIs() {
+  markerClusterGroup.clearLayers();
+  allMarkers = [];
+
+  poisGeo.features.forEach(function(f) {
+    if (!f.geometry || f.geometry.type !== "Point") return;
+    const [lng, lat] = f.geometry.coordinates;
+    const cat = getCategory(f.properties);
+    const cfg = CAT_CONFIG[cat] || CAT_CONFIG["Servicio"];
+
+    const marker = L.marker([lat, lng], {
+      icon: L.divIcon({
+        className: "",
+        html: `<div style="
+          background:white; border-radius:50%; width:32px; height:32px;
+          display:flex; align-items:center; justify-content:center;
+          box-shadow:0 2px 8px rgba(0,0,0,0.25);
+          border:2px solid ${cfg.color};
+        "><i class="fas ${cfg.icon}" style="color:${cfg.color};font-size:14px;"></i></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+      })
+    });
+
+    // Popup mini
+    const name = f.properties.name || "Punto de interés";
+    marker.bindPopup(`
+      <div class="popup-mini">
+        <div class="pm-name">${name}</div>
+        <div class="pm-cat">${cat}</div>
+        <button class="pm-btn" onclick="openPOICard('${name.replace(/'/g,"\\'")}')">Ver detalles</button>
+      </div>
+    `, { maxWidth: 200, minWidth: 160 });
+
+    markerClusterGroup.addLayer(marker);
+    allMarkers.push({ feature: f, marker, cat });
+  });
+}
+
+// ============================================================
+//  TARJETA DE POI
+// ============================================================
+function openPOICard(name) {
+  const entry = allMarkers.find(m => m.feature.properties.name === name);
+  if (!entry) return;
+
+  const f = entry.feature;
+  const cat = entry.cat;
+  currentPOI = f;
+
+  // Llenar tarjeta
+  document.getElementById("poc-name").textContent = name;
+  document.getElementById("poc-cat").textContent = cat;
+
+  // Descripción
+  const desc = f.properties.description || f.properties.description_kml || "";
+  const descEl = document.getElementById("poc-desc");
+  descEl.textContent = desc || "";
+  descEl.style.display = desc ? "block" : "none";
+
+  // Galería
+  const gallery = document.getElementById("poc-gallery");
+  gallery.innerHTML = "";
+  const imgs = BUILDING_IMAGES[name] || [];
+  if (imgs.length > 0) {
+    // Las imágenes están en /map/images/ relativo a la raíz del proyecto
+    // el iframe está en pages/, así que la ruta es ../map/images/
+    imgs.forEach(function(src) {
+      const img = document.createElement("img");
+      img.src = "../map/" + src;
+      img.alt = name;
+      img.addEventListener("click", function() { openImgModal(img.src); });
+      gallery.appendChild(img);
+    });
+    gallery.style.display = "grid";
+  } else {
+    gallery.style.display = "none";
+  }
+
+  // Cerrar popup del mapa
+  map.closePopup();
+
+  // Mostrar tarjeta
+  document.getElementById("poi-card").classList.add("visible");
+}
+
+function closePOICard() {
+  document.getElementById("poi-card").classList.remove("visible");
+  currentPOI = null;
+}
+
+// ============================================================
+//  RUTA
+// ============================================================
+function calcularRutaAlPOI() {
+  if (!currentPOI) return;
+
+  if (!lastUserCoord) {
+    showToast("Activa tu ubicación para calcular la ruta");
+    return;
+  }
+
+  const [dstLng, dstLat] = currentPOI.geometry.coordinates;
+  const startNode = findNearestNode(lastUserCoord);
+  const endNode   = findNearestNode([dstLng, dstLat]);
+
+  if (!startNode.id || !endNode.id) {
+    showToast("No se encontró ruta disponible");
+    return;
+  }
+
+  const result = dijkstra(startNode.id, endNode.id);
+
+  if (!result.path.length) {
+    showToast("No se pudo calcular la ruta");
+    return;
+  }
+
+  // Dibujar línea de ruta
+  if (currentRouteLine) map.removeLayer(currentRouteLine);
+  currentRouteLine = L.polyline(
+    result.path.map(c => [c[1], c[0]]),
+    { color: "#e74c3c", weight: 5, opacity: 0.85, dashArray: "8, 6" }
+  ).addTo(map);
+  map.fitBounds(currentRouteLine.getBounds(), { padding: [40, 40] });
+
+  // Marcador destino
+  if (destMarker) map.removeLayer(destMarker);
+  destMarker = L.marker([dstLat, dstLng], {
+    icon: L.divIcon({
+      className: "",
+      html: `<div class="dest-pin"><i class="fas fa-map-marker-alt"></i></div>`,
+      iconSize: [30, 40], iconAnchor: [15, 40]
+    })
+  }).addTo(map);
+
+  // Panel de ruta
+  const dist = result.distance;
+  const mins = Math.ceil(dist / WALKING_SPEED / 60);
+  document.getElementById("rp-dist").textContent = dist < 1000 ? Math.round(dist) + " m" : (dist/1000).toFixed(1) + " km";
+  document.getElementById("rp-time").textContent = mins + " min";
+  document.getElementById("rp-dest").textContent = "→ " + (currentPOI.properties.name || "Destino");
+  document.getElementById("route-panel").classList.add("visible");
+
+  closePOICard();
+}
+
+function cancelarRuta() {
+  if (currentRouteLine) { map.removeLayer(currentRouteLine); currentRouteLine = null; }
+  if (destMarker) { map.removeLayer(destMarker); destMarker = null; }
+  document.getElementById("route-panel").classList.remove("visible");
+}
+
+// ============================================================
+//  BÚSQUEDA
+// ============================================================
+function setupSearch() {
+  const items = poisGeo.features.map(f => ({
+    name: f.properties.name || "",
+    cat:  getCategory(f.properties),
+    feature: f
+  }));
+
+  fuseIndex = new Fuse(items, {
+    keys: ["name"],
+    threshold: 0.35,
+    minMatchCharLength: 2
+  });
+
+  const input  = document.getElementById("map-search-input");
+  const results = document.getElementById("map-search-results");
+
+  input.addEventListener("input", function() {
+    const q = this.value.trim();
+    if (q.length < 2) { results.classList.remove("open"); return; }
+
+    const hits = fuseIndex.search(q).slice(0, 8);
+    if (!hits.length) { results.classList.remove("open"); return; }
+
+    results.innerHTML = hits.map(function(h) {
+      const cfg = CAT_CONFIG[h.item.cat] || CAT_CONFIG["Servicio"];
+      return `<div class="search-result-item" onclick="goToPOI('${h.item.name.replace(/'/g,"\\'")}')">
+        <div class="sri-icon"><i class="fas ${cfg.icon}" style="color:${cfg.color}"></i></div>
+        <div><div class="sri-name">${h.item.name}</div><div class="sri-cat">${h.item.cat}</div></div>
+      </div>`;
+    }).join("");
+    results.classList.add("open");
+  });
+
+  document.addEventListener("click", function(e) {
+    if (!e.target.closest("#map-topbar")) {
+      results.classList.remove("open");
+    }
+  });
+}
+
+function goToPOI(name) {
+  document.getElementById("map-search-results").classList.remove("open");
+  document.getElementById("map-search-input").value = name;
+
+  const entry = allMarkers.find(m => m.feature.properties.name === name);
+  if (!entry) return;
+
+  const [lng, lat] = entry.feature.geometry.coordinates;
+  map.setView([lat, lng], 19);
+  entry.marker.openPopup();
+}
+
+// ============================================================
+//  FILTRO POR CATEGORÍA  (listeners registrados en setupUI)
+// ============================================================
+
+function filterMarkers() {
+  markerClusterGroup.clearLayers();
+  allMarkers.forEach(function(m) {
+    if (activeCategory === "Todos" || m.cat === activeCategory) {
+      markerClusterGroup.addLayer(m.marker);
+    }
+  });
+}
+
+// ============================================================
+//  UBICACIÓN DEL USUARIO
+// ============================================================
+function requestLocation() {
+  if (!navigator.geolocation) return;
+  watchId = navigator.geolocation.watchPosition(
+    function(pos) {
+      const { latitude: lat, longitude: lng } = pos.coords;
+      lastUserCoord = [lng, lat];
+
+      const icon = L.divIcon({
+        className: "",
+        html: `<div class="user-dot"></div>`,
+        iconSize: [16, 16], iconAnchor: [8, 8]
+      });
+
+      if (userMarker) {
+        userMarker.setLatLng([lat, lng]);
+      } else {
+        userMarker = L.marker([lat, lng], { icon, zIndexOffset: 1000 }).addTo(map);
+        userMarker.bindPopup("📍 Tu ubicación");
+      }
+    },
+    function(err) { console.warn("Geolocalización:", err.message); },
+    { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+  );
+}
+
+document.getElementById("btn-my-location").addEventListener("click", function() {
+  if (lastUserCoord) {
+    map.setView([lastUserCoord[1], lastUserCoord[0]], 18);
+  } else {
+    showToast("Ubicación no disponible aún");
+    requestLocation();
+  }
+});
+
+// ============================================================
+//  ALGORITMO DE RUTA (Dijkstra)
+// ============================================================
+function buildGraph() {
+  graph = { nodes:{}, coordsToId:{}, adj:{} };
+  routesGeo.features.forEach(function(f) {
+    const geom = f.geometry;
+    const lines = geom.type === "LineString" ? [geom.coordinates] : geom.coordinates;
+    lines.forEach(function(coords) {
+      for (let i = 0; i < coords.length - 1; i++) {
+        const a = coords[i], b = coords[i+1];
+        const ia = addNode(a), ib = addNode(b);
+        const d = turf.distance(turf.point(a), turf.point(b), { units: "meters" });
+        graph.adj[ia].push({ to: ib, dist: d });
+        graph.adj[ib].push({ to: ia, dist: d });
+      }
+    });
+  });
+}
+
+function addNode(coord) {
+  const key = coord.join(",");
+  if (!graph.coordsToId[key]) {
+    const id = Object.keys(graph.nodes).length;
+    graph.nodes[id] = coord;
+    graph.coordsToId[key] = id;
+    graph.adj[id] = [];
+  }
+  return graph.coordsToId[key];
+}
+
+function findNearestNode(targetCoord) {
+  let minDist = Infinity, nearestId = null;
+  for (const id in graph.nodes) {
+    const d = turf.distance(turf.point(targetCoord), turf.point(graph.nodes[id]), { units: "meters" });
+    if (d < minDist) { minDist = d; nearestId = id; }
+  }
+  return { id: nearestId, dist: minDist };
+}
+
+function dijkstra(startId, endId) {
+  const dist = {}, prev = {};
+  const pq = [];
+
+  for (const id in graph.nodes) { dist[id] = Infinity; prev[id] = null; }
+  dist[startId] = 0;
+  pq.push({ id: startId, d: 0 });
+
+  while (pq.length) {
+    pq.sort((a,b) => a.d - b.d);
+    const { id: cur } = pq.shift();
+    if (cur === endId) break;
+    for (const edge of (graph.adj[cur] || [])) {
+      const nd = dist[cur] + edge.dist;
+      if (nd < dist[edge.to]) {
+        dist[edge.to] = nd;
+        prev[edge.to] = cur;
+        pq.push({ id: edge.to, d: nd });
+      }
+    }
+  }
+
+  const path = [];
+  let cur = endId;
+  while (cur !== null) { path.unshift(graph.nodes[cur]); cur = prev[cur]; }
+
+  return {
+    path: path.length > 1 ? path : [],
+    distance: dist[endId] === Infinity ? 0 : dist[endId]
+  };
+}
+
+// ============================================================
+//  MODAL DE IMAGEN
+// ============================================================
+function openImgModal(src) {
+  document.getElementById("img-modal-src").src = src;
+  document.getElementById("img-modal").classList.add("open");
+}
+
+document.getElementById("img-modal").addEventListener("click", function(e) {
+  if (e.target === this || e.target.id === "img-modal-close") {
+    this.classList.remove("open");
+  }
+});
+
+// ============================================================
+//  TOAST
+// ============================================================
+function showToast(msg, duration) {
+  const t = document.getElementById("map-toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(function() { t.classList.remove("show"); }, duration || 2800);
+}
+
+// ============================================================
+//  SETUP UI LISTENERS
+// ============================================================
+function setupUI() {
+  document.getElementById("poc-close").addEventListener("click", closePOICard);
+  document.getElementById("poc-btn-cerrar").addEventListener("click", closePOICard);
+  document.getElementById("poc-btn-ruta").addEventListener("click", calcularRutaAlPOI);
+  document.getElementById("route-panel-close").addEventListener("click", cancelarRuta);
+
+  // ── Filtro por categoría ──────────────────────────────────
+  // Registrado aquí (dentro de DOMContentLoaded vía setupUI) para que
+  // los .cat-chip ya existan en el DOM al momento de buscarlos.
+  document.querySelectorAll(".cat-chip").forEach(function(chip) {
+    chip.addEventListener("click", function() {
+      document.querySelectorAll(".cat-chip").forEach(function(c) {
+        c.classList.remove("active");
+      });
+      this.classList.add("active");
+      activeCategory = this.dataset.cat;
+      filterMarkers();
+    });
+  });
+
+  // ── Sistema de reportes estilo Waze ───────────────────────
+  // Inicializar WazeReports después de que el mapa esté listo
+  setTimeout(function() {
+    if (window.WazeReports && window.map) {
+      WazeReports.init();
+      console.log("✓ Sistema de reportes Waze activado");
+    }
+  }, 1200);
+
+  // ── Exponer globalmente para popups (onclick en HTML) ─────
+  window.openPOICard = openPOICard;
+  window.goToPOI = goToPOI;
+}
+</script>
+
+<!-- Sistema de reportes estilo Waze (requiere Node.js corriendo) -->
+<script src="../map/js/waze_reports.js"></script>
+
+<!-- Service Worker para modo offline -->
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('../map/js/service-worker.js')
+      .catch(function(err) { console.log('SW no disponible:', err); });
+  }
+</script>
+</body>
+</html>

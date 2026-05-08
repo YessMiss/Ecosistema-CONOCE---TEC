@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONOCE-TEC - Panel de Administrador</title>
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles-dashboard-admin.css">
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="admin-sidebar collapsed" id="adminSidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-logo">
+            <div class="logo-circle-sm">CT</div>
+            <div class="sidebar-brand" id="sidebarBrandText">
+                <span class="brand-main">TEC</span>
+                <span class="brand-sub">Campus</span>
+            </div>
+        </div>
+        <p class="sidebar-role-label" id="sidebarRoleLabel">Panel de Administrador</p>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section-label sidebar-label-text">Gestión de Contenido</div>
+        <a href="#" class="snav-item active" data-panel="dashboard" title="Dashboard">
+            <i class="fas fa-tachometer-alt"></i>
+            <span class="snav-text"> Dashboard</span>
+        </a>
+        <a href="#" class="snav-item" data-panel="inicio-content" title="Inicio">
+            <i class="fas fa-home"></i>
+            <span class="snav-text"> Inicio</span>
+            <span class="snav-sub sidebar-sub-text">Mural, misión, visión, historia, contacto y estadísticas</span>
+        </a>
+        <a href="#" class="snav-item" data-panel="mapa-content" title="Mapa">
+            <i class="fas fa-map-marked-alt"></i>
+            <span class="snav-text"> Mapa</span>
+            <span class="snav-sub sidebar-sub-text">Integración y configuración</span>
+        </a>
+        <a href="#" class="snav-item" data-panel="directorio-content" title="Directorio">
+            <i class="fas fa-address-book"></i>
+            <span class="snav-text"> Directorio</span>
+            <span class="snav-sub sidebar-sub-text">Docentes y administrativos</span>
+        </a>
+        <a href="#" class="snav-item" data-panel="cafeteria-content" title="Cafetería">
+            <i class="fas fa-utensils"></i>
+            <span class="snav-text"> Cafetería</span>
+            <span class="snav-sub sidebar-sub-text">Menú del día y comidas rápidas</span>
+        </a>
+
+        <div class="nav-section-label sidebar-label-text">Usuarios y Accesos</div>
+        <a href="#" class="snav-item" data-panel="usuarios-content" title="Usuarios">
+            <i class="fas fa-users"></i>
+            <span class="snav-text"> Usuarios</span>
+            <span class="snav-sub sidebar-sub-text">Gestionar cuentas y permisos</span>
+        </a>
+        <a href="#" class="snav-item" data-panel="roles-content" title="Roles y Permisos">
+            <i class="fas fa-shield-alt"></i>
+            <span class="snav-text"> Roles y Permisos</span>
+            <span class="snav-sub sidebar-sub-text">Configurar accesos</span>
+        </a>
+        <a href="#" class="snav-item" data-panel="notificaciones-content" title="Notificaciones">
+            <i class="fas fa-bell"></i>
+            <span class="snav-text"> Notificaciones</span>
+            <span class="snav-sub sidebar-sub-text">Alertas y mensajes del sistema</span>
+            <span class="snav-badge" id="snavNotifBadge" style="display:none;">0</span>
+        </a>
+        <a href="#" class="snav-item" data-panel="seguridad-content" title="Seguridad">
+            <i class="fas fa-lock"></i>
+            <span class="snav-text"> Seguridad</span>
+            <span class="snav-sub sidebar-sub-text">Contraseña, accesos y autenticación</span>
+        </a>
+
+        <div class="nav-section-label sidebar-label-text">Estadísticas</div>
+        <a href="#" class="snav-item" data-panel="estadisticas-content" title="Estadísticas">
+            <i class="fas fa-chart-bar"></i>
+            <span class="snav-text"> Estadísticas</span>
+            <span class="snav-sub sidebar-sub-text">Visitas y actividad del sitio</span>
+        </a>
+
+        <div class="nav-section-label sidebar-label-text">Sistema</div>
+        <a href="#" class="snav-item" data-panel="configuracion-content" title="Configuración">
+            <i class="fas fa-cog"></i>
+            <span class="snav-text"> Configuración</span>
+            <span class="snav-sub sidebar-sub-text">Módulos, funciones y apariencia</span>
+        </a>
+        <a href="#" class="snav-item" data-panel="bitacora-content" title="Bitácora">
+            <i class="fas fa-clipboard-list"></i>
+            <span class="snav-text"> Bitácora</span>
+            <span class="snav-sub sidebar-sub-text">Registros de actividad</span>
+        </a>
+        <a href="#" class="snav-item" data-panel="respaldos-content" title="Respaldos">
+            <i class="fas fa-database"></i>
+            <span class="snav-text"> Respaldos</span>
+            <span class="snav-sub sidebar-sub-text">Copias de seguridad locales</span>
+        </a>
+        <a href="#" class="snav-item" data-panel="soporte-content" title="Soporte Técnico">
+            <i class="fas fa-headset"></i>
+            <span class="snav-text"> Soporte Técnico</span>
+            <span class="snav-sub sidebar-sub-text">Reportar problemas y contacto</span>
+        </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+        <a href="#" id="btnCerrarSesionSidebar" class="snav-item snav-logout" title="Cerrar sesión">
+            <i class="fas fa-sign-out-alt"></i>
+            <span class="snav-text"> Cerrar sesión</span>
+        </a>
+    </div>
+</aside>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="admin-main sidebar-collapsed" id="adminMain">
+
+    <!-- Top Bar -->
+    <header class="admin-topbar">
+        <div class="topbar-left">
+            <button class="sidebar-toggle" id="sidebarToggle" title="Mostrar/ocultar menú">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="topbar-title" id="topbarTitle">
+                <h2>¡Bienvenido, <span id="adminWelcomeName">Administrador</span>!</h2>
+                <p>Aquí tienes un resumen general del sistema.</p>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <!-- Modo Oscuro -->
+            <button class="topbar-dark-btn" id="btnDarkModeAdmin" title="Modo oscuro">
+                <i class="fas fa-moon"></i>
+            </button>
+
+            <!-- Notificaciones -->
+            <div class="notif-wrap" id="notifWrap" title="Notificaciones">
+                <i class="fas fa-bell"></i>
+                <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                <div class="notif-dropdown" id="notifDropdown">
+                    <div class="notif-header">
+                        <span>Notificaciones</span>
+                        <button class="notif-mark-all" id="btnMarcarTodasLeidas">Marcar todas leídas</button>
+                    </div>
+                    <div class="notif-list" id="notifList">
+                        <div style="padding:16px;text-align:center;color:#888;font-size:.8rem;">Cargando...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Usuario → redirige a Perfil -->
+            <a href="#" class="topbar-user" id="topbarUser" title="Mi Perfil" data-panel="perfil-admin">
+                <div class="topbar-avatar" id="topbarAvatarWrap">
+                    <img id="topbarAvatarImg" src="" alt="Admin" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                    <i class="fas fa-user" id="topbarAvatarIcon"></i>
+                </div>
+                <div class="topbar-user-info">
+                    <span class="tu-name" id="topbarAdminName">Administrador</span>
+                    <span class="tu-role" id="topbarAdminRole">admin@tec.edu.mx</span>
+                </div>
+                <i class="fas fa-chevron-down tu-chevron"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- ===== PANEL SECTIONS ===== -->
+    <div class="panel-content">
+
+        <!-- ======== DASHBOARD ======== -->
+        <section class="admin-panel active" id="panel-dashboard">
+
+            <!-- KPI Cards -->
+            <div class="kpi-row">
+                <div class="kpi-card kpi-blue">
+                    <div class="kpi-icon"><i class="fas fa-users"></i></div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Visitas Totales</span>
+                        <span class="kpi-value" id="kpiVisitasTotales">0</span>
+                        <span class="kpi-sub">Alumno + Visitante</span>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-green">
+                    <div class="kpi-icon"><i class="fas fa-user-plus"></i></div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Usuarios Registrados</span>
+                        <span class="kpi-value" id="kpiUsuariosReg">0</span>
+                        <span class="kpi-sub">Alumnos con cuenta</span>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-purple">
+                    <div class="kpi-icon"><i class="fas fa-eye"></i></div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Visitas Hoy</span>
+                        <span class="kpi-value" id="kpiVisitasHoy">0</span>
+                        <span class="kpi-sub">Sesiones del día</span>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-orange">
+                    <div class="kpi-icon"><i class="fas fa-file-alt"></i></div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Menús Publicados</span>
+                        <span class="kpi-value" id="kpiMenus">0</span>
+                        <span class="kpi-sub">En la cafetería</span>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-red">
+                    <div class="kpi-icon"><i class="fas fa-address-card"></i></div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Contactos Personales</span>
+                        <span class="kpi-value" id="kpiContactos">0</span>
+                        <span class="kpi-sub">Agregados por alumnos</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle row: Accesos Rápidos + Actividad + Resumen -->
+            <div class="dash-grid-2">
+
+                <!-- Accesos Rápidos -->
+                <div class="dash-card">
+                    <h3 class="dash-card-title">Accesos Rápidos</h3>
+                    <div class="quick-access-grid">
+                        <button class="qa-btn" data-panel="inicio-content">
+                            <i class="fas fa-edit"></i>
+                            <span class="qa-main">Editar Inicio</span>
+                            <span class="qa-sub">Mural, misión, visión, historia y contacto</span>
+                        </button>
+                        <button class="qa-btn" data-panel="mapa-content">
+                            <i class="fas fa-map-marked-alt"></i>
+                            <span class="qa-main">Gestionar Mapa</span>
+                            <span class="qa-sub">Configurar integración del mapa</span>
+                        </button>
+                        <button class="qa-btn" data-panel="directorio-content">
+                            <i class="fas fa-users"></i>
+                            <span class="qa-main">Gestionar Directorio</span>
+                            <span class="qa-sub">Administrar docentes y administrativos</span>
+                        </button>
+                        <button class="qa-btn" data-panel="cafeteria-content">
+                            <i class="fas fa-utensils"></i>
+                            <span class="qa-main">Menú del Día</span>
+                            <span class="qa-sub">Ver y administrar menús publicados</span>
+                        </button>
+                        <button class="qa-btn" data-panel="usuarios-content">
+                            <i class="fas fa-user-cog"></i>
+                            <span class="qa-main">Usuarios</span>
+                            <span class="qa-sub">Ver y administrar usuarios registrados</span>
+                        </button>
+                        <button class="qa-btn" data-panel="estadisticas-content">
+                            <i class="fas fa-chart-line"></i>
+                            <span class="qa-main">Estadísticas</span>
+                            <span class="qa-sub">Ver reportes y estadísticas</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Actividad Reciente -->
+                <div class="dash-card">
+                    <div class="dash-card-header">
+                        <h3 class="dash-card-title">Actividad Reciente</h3>
+                        <button class="dash-btn-link" data-panel="bitacora-content">Ver todo</button>
+                    </div>
+                    <ul class="activity-list" id="activityList">
+                        <li class="act-item">
+                            <div class="act-icon act-blue"><i class="fas fa-eye"></i></div>
+                            <div class="act-info">
+                                <strong>Visitas al sistema</strong>
+                                <span id="actVisitas">0 visitas registradas en total.</span>
+                            </div>
+                        </li>
+                        <li class="act-item">
+                            <div class="act-icon act-green"><i class="fas fa-user-plus"></i></div>
+                            <div class="act-info">
+                                <strong>Alumnos registrados</strong>
+                                <span id="actRegistrados">0 alumnos en el sistema.</span>
+                            </div>
+                        </li>
+                        <li class="act-item" id="actItemUltimoUsuario">
+                            <div class="act-icon act-orange"><i class="fas fa-user"></i></div>
+                            <div class="act-info">
+                                <strong>Último usuario registrado</strong>
+                                <span id="actNuevoUsuario">—</span>
+                            </div>
+                        </li>
+                        <li class="act-item">
+                            <div class="act-icon act-orange"><i class="fas fa-utensils"></i></div>
+                            <div class="act-info">
+                                <strong>Menús en cafetería</strong>
+                                <span id="actMenus">0 menús publicados.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Resumen del Sistema -->
+                <div class="dash-card">
+                    <div class="dash-card-header">
+                        <h3 class="dash-card-title">Resumen del Sistema</h3>
+                        <button class="dash-btn-link" data-panel="estadisticas-content">Ver reporte completo</button>
+                    </div>
+                    <ul class="system-summary-list">
+                        <li>
+                            <span class="ss-icon"><i class="fas fa-users"></i></span>
+                            <span class="ss-label">Total de visitas</span>
+                            <span class="ss-val"><em id="resumVisitas">Sin visitas aún</em></span>
+                        </li>
+                        <li>
+                            <span class="ss-icon"><i class="fas fa-user-check"></i></span>
+                            <span class="ss-label">Alumnos registrados</span>
+                            <span class="ss-val"><em id="resumRegistrados">Sin registros aún</em></span>
+                        </li>
+                        <li>
+                            <span class="ss-icon"><i class="fas fa-address-book"></i></span>
+                            <span class="ss-label">Contactos en directorio</span>
+                            <span class="ss-val"><em id="resumContactos">0 contactos</em></span>
+                        </li>
+                        <li>
+                            <span class="ss-icon"><i class="fas fa-mobile-alt"></i></span>
+                            <span class="ss-label">Datos en tiempo real</span>
+                            <span class="ss-val"><em style="color:#10b981;">Sí — desde localStorage</em></span>
+                        </li>
+                        <li>
+                            <span class="ss-icon"><i class="fas fa-info-circle"></i></span>
+                            <span class="ss-label">Nota</span>
+                            <span class="ss-val" style="font-size:.7rem;"><em>Los datos se actualizan conforme el alumno/visitante usa el sistema.</em></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom row -->
+            <div class="dash-grid-3">
+
+                <!-- Gestión de Contenido -->
+                <div class="dash-card">
+                    <h3 class="dash-card-title">Gestión de Contenido</h3>
+                    <ul class="content-mgmt-list">
+                        <li>
+                            <div class="cm-icon cm-blue"><i class="fas fa-home"></i></div>
+                            <div class="cm-info">
+                                <strong>Inicio</strong>
+                                <span>Edita el mural, visión, misión, historia e información de contacto.</span>
+                            </div>
+                            <button class="cm-btn" data-panel="inicio-content">Editar</button>
+                        </li>
+                        <li>
+                            <div class="cm-icon cm-green"><i class="fas fa-map-marked-alt"></i></div>
+                            <div class="cm-info">
+                                <strong>Mapa</strong>
+                                <span>Configura la integración y opciones del mapa del campus.</span>
+                            </div>
+                            <button class="cm-btn" data-panel="mapa-content">Configurar</button>
+                        </li>
+                        <li>
+                            <div class="cm-icon cm-purple"><i class="fas fa-address-book"></i></div>
+                            <div class="cm-info">
+                                <strong>Directorio</strong>
+                                <span>Administra la información de docentes y administrativos.</span>
+                            </div>
+                            <button class="cm-btn" data-panel="directorio-content">Gestionar</button>
+                        </li>
+                        <li>
+                            <div class="cm-icon cm-orange"><i class="fas fa-utensils"></i></div>
+                            <div class="cm-info">
+                                <strong>Cafetería</strong>
+                                <span>Revisa y administra el menú del día y comidas rápidas.</span>
+                            </div>
+                            <button class="cm-btn" data-panel="cafeteria-content">Administrar</button>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Tareas Pendientes -->
+                <div class="dash-card">
+                    <div class="dash-card-header">
+                        <h3 class="dash-card-title">Tareas Pendientes</h3>
+                    </div>
+                    <ul class="tasks-list" id="tasksList">
+                        <li class="task-item">
+                            <div class="task-icon task-orange"><i class="fas fa-clipboard"></i></div>
+                            <div class="task-info">
+                                <strong>Actualizar menú del día</strong>
+                                <span>Publica el menú de la cafetería para mañana.</span>
+                            </div>
+                            <span class="task-badge badge-pending">Pendiente</span>
+                        </li>
+                        <li class="task-item">
+                            <div class="task-icon task-blue"><i class="fas fa-user-check"></i></div>
+                            <div class="task-info">
+                                <strong>Revisar nuevos registros</strong>
+                                <span id="taskNuevosReg">Revisa los alumnos recién registrados.</span>
+                            </div>
+                            <span class="task-badge badge-pending">Pendiente</span>
+                        </li>
+                        <li class="task-item">
+                            <div class="task-icon task-red"><i class="fas fa-phone"></i></div>
+                            <div class="task-info">
+                                <strong>Verificar datos de contacto</strong>
+                                <span>Comprueba que la información de contacto institucional esté actualizada.</span>
+                            </div>
+                            <span class="task-badge badge-pending">Pendiente</span>
+                        </li>
+                    </ul>
+                    <a href="#" class="dash-see-all" data-panel="bitacora-content">Ver todas las tareas pendientes →</a>
+                </div>
+
+                <!-- Enlaces Rápidos -->
+                <div class="dash-card">
+                    <h3 class="dash-card-title">Enlaces Rápidos</h3>
+                    <ul class="quick-links-list">
+                        <li>
+                            <span class="ql-icon"><i class="fas fa-eye"></i></span>
+                            <div class="ql-info">
+                                <strong>Ver sitio como visitante</strong>
+                                <span>Abrir en una nueva pestaña</span>
+                            </div>
+                            <a href="../index.html" target="_blank" class="ql-arrow"><i class="fas fa-external-link-alt"></i></a>
+                        </li>
+                        <li>
+                            <span class="ql-icon"><i class="fas fa-user-graduate"></i></span>
+                            <div class="ql-info">
+                                <strong>Abrir Dashboard de Alumno</strong>
+                                <span>Para gestionar Inicio, Mapa, Directorio, Cafetería</span>
+                            </div>
+                            <a href="dashboard-alumno.html" class="ql-arrow"><i class="fas fa-external-link-alt"></i></a>
+                        </li>
+                        <li>
+                            <span class="ql-icon"><i class="fas fa-headset"></i></span>
+                            <div class="ql-info">
+                                <strong>Soporte técnico</strong>
+                                <span>Contacto y ayuda</span>
+                            </div>
+                            <a href="#" class="ql-arrow" data-panel="soporte-content"><i class="fas fa-external-link-alt"></i></a>
+                        </li>
+                        <li>
+                            <span class="ql-icon"><i class="fas fa-download"></i></span>
+                            <div class="ql-info">
+                                <strong>Respaldar ahora</strong>
+                                <span>Exportar datos locales del sistema</span>
+                            </div>
+                            <a href="#" class="ql-arrow" id="btnRespaldar"><i class="fas fa-external-link-alt"></i></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ======== PERFIL ADMIN ======== -->
+        <section class="admin-panel" id="panel-perfil-admin">
+            <div class="inner-panel-header">
+                <h2><i class="fas fa-user-shield me-2"></i>Perfil del Administrador</h2>
+            </div>
+
+            <!-- Aviso para admin genérico -->
+            <div id="perfilAvisoGenerico" class="perfil-aviso-generico" style="display:none;">
+                <i class="fas fa-incognito me-2" style="color:#f5c518;"></i>
+                <strong>Acceso de incógnito:</strong> Iniciaste sesión con las credenciales genéricas (<code>admin / conocetec2024</code>).
+                No se muestran datos personales porque no hay un perfil de administrador registrado.
+                <a href="registro-admin.html" style="color:#1e2a5a;font-weight:700;margin-left:6px;">Registrar un administrador →</a>
+            </div>
+
+            <div class="perfil-admin-layout">
+                <div class="perfil-card-main">
+                    <div class="perfil-avatar-section">
+                        <div class="perfil-avatar-wrap" id="perfilAvatarWrap">
+                            <img id="perfilAvatarImg" src="" alt="Foto" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                            <i class="fas fa-user" id="perfilAvatarIcon" style="font-size:3rem;color:#9e9e9e;"></i>
+                        </div>
+                        <label class="perfil-change-photo" for="perfilFotoInput" title="Cambiar foto">
+                            <i class="fas fa-camera"></i>
+                        </label>
+                        <input type="file" id="perfilFotoInput" accept="image/*" style="display:none;">
+                    </div>
+                    <div class="perfil-name-section">
+                        <h3 id="perfilNombreDisplay">Administrador</h3>
+                        <span class="perfil-role-badge" id="perfilRolDisplay">Administrador</span>
+                    </div>
+                </div>
+                <div class="perfil-info-sections">
+                    <div class="pi-section">
+                        <h4><i class="fas fa-id-card me-2"></i>Información Personal</h4>
+                        <div class="pi-grid">
+                            <div class="pi-item">
+                                <label>Nombre Completo</label>
+                                <p id="piNombre">—</p>
+                            </div>
+                            <div class="pi-item">
+                                <label>Correo Institucional</label>
+                                <p id="piCorreo">—</p>
+                            </div>
+                            <div class="pi-item">
+                                <label>Número de Empleado / ID</label>
+                                <p id="piEmpleado">—</p>
+                            </div>
+                            <div class="pi-item">
+                                <label>Área o Departamento</label>
+                                <p id="piArea">—</p>
+                            </div>
+                            <div class="pi-item">
+                                <label>Rol</label>
+                                <p id="piRol">—</p>
+                            </div>
+                            <div class="pi-item">
+                                <label>Usuario</label>
+                                <p id="piUsuario">—</p>
+                            </div>
+                        </div>
+                        <button class="btn-edit-perfil" onclick="window.location.href='registro-admin.html'">
+                            <i class="fas fa-edit me-1"></i> Editar / Actualizar información
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ======== USUARIOS — GESTIÓN COMPLETA ======== -->
+        <section class="admin-panel" id="panel-usuarios-content">
+            <div class="inner-panel-header">
+                <h2><i class="fas fa-users me-2"></i>Gestión de Usuarios</h2>
+                <button class="btn-primary-sm" id="btnNuevoUsuario">
+                    <i class="fas fa-user-plus me-1"></i> Nuevo Usuario
+                </button>
+            </div>
+            <div class="inner-panel-body">
+                <!-- Stats -->
+                <div class="users-stats-row">
+                    <div class="ustat-card"><i class="fas fa-user-graduate"></i><span class="ustat-num" id="ustatAlumnos">0</span><span class="ustat-label">Alumnos</span></div>
+                    <div class="ustat-card"><i class="fas fa-walking"></i><span class="ustat-num" id="ustatVisitantes">0</span><span class="ustat-label">Visitantes</span></div>
+                    <div class="ustat-card"><i class="fas fa-user-shield"></i><span class="ustat-num">1</span><span class="ustat-label">Administradores</span></div>
+                    <div class="ustat-card"><i class="fas fa-ban"></i><span class="ustat-num" id="ustatBloqueados">0</span><span class="ustat-label">Bloqueados</span></div>
+                </div>
+
+                <!-- Tabla -->
+                <div class="users-table-wrap">
+                    <div class="users-table-toolbar">
+                        <input type="text" class="users-search" id="usersSearchInput" placeholder="Buscar por nombre o correo...">
+                        <select class="users-filter" id="usersFilterType">
+                            <option value="">Todos los tipos</option>
+                            <option value="alumno">Alumnos</option>
+                            <option value="visitante">Visitantes</option>
+                        </select>
+                        <select class="users-filter" id="usersFilterStatus">
+                            <option value="">Todos los estados</option>
+                            <option value="activo">Activos</option>
+                            <option value="bloqueado">Bloqueados</option>
+                        </select>
+                    </div>
+                    <p class="no-users-msg" id="noUsersMsg" style="text-align:center;color:#888;padding:32px;">
+                        No hay usuarios registrados en este dispositivo todavía.<br>
+                        <small style="color:#aaa;">Los datos provienen del localStorage del navegador.</small>
+                    </p>
+                    <table class="users-table" id="usersTable" style="display:none;">
+                        <thead>
+                            <tr>
+                                <th>#</th><th>Nombre</th><th>Tipo</th><th>Correo / Usuario</th><th>Estado</th><th>Registro</th><th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Modal: Nuevo / Editar Usuario -->
+            <div class="adm-modal-backdrop" id="modalUsuarioBackdrop" style="display:none;">
+                <div class="adm-modal">
+                    <div class="adm-modal-header">
+                        <h3 id="modalUsuarioTitle">Nuevo Usuario</h3>
+                        <button class="adm-modal-close" id="btnCerrarModalUsuario"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="adm-modal-body">
+                        <input type="hidden" id="modalUsuarioId">
+                        <div class="adm-form-row">
+                            <div class="adm-form-group">
+                                <label>Nombre Completo *</label>
+                                <input type="text" class="adm-input" id="muNombre" placeholder="Nombre completo">
+                            </div>
+                            <div class="adm-form-group">
+                                <label>Correo / Usuario *</label>
+                                <input type="text" class="adm-input" id="muCorreo" placeholder="correo@ejemplo.com">
+                            </div>
+                        </div>
+                        <div class="adm-form-row">
+                            <div class="adm-form-group">
+                                <label>Tipo de usuario</label>
+                                <select class="adm-input" id="muTipo">
+                                    <option value="alumno">Alumno</option>
+                                    <option value="visitante">Visitante</option>
+                                </select>
+                            </div>
+                            <div class="adm-form-group">
+                                <label>Rol</label>
+                                <select class="adm-input" id="muRol">
+                                    <option value="alumno">Alumno</option>
+                                    <option value="visitante">Visitante</option>
+                                    <option value="editor">Editor</option>
+                                    <option value="admin">Administrador</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="adm-form-row">
+                            <div class="adm-form-group">
+                                <label>Estado</label>
+                                <select class="adm-input" id="muEstado">
+                                    <option value="activo">Activo</option>
+                                    <option value="bloqueado">Bloqueado</option>
+                                </select>
+                            </div>
+                            <div class="adm-form-group">
+                                <label>Contraseña (dejar vacío para no cambiar)</label>
+                                <input type="password" class="adm-input" id="muPassword" placeholder="••••••••">
+                            </div>
+                        </div>
+                        <p id="modalUsuarioError" style="color:#ef4444;font-size:.8rem;display:none;margin-top:4px;"></p>
+                    </div>
+                    <div class="adm-modal-footer">
+                        <button class="adm-btn-cancel" id="btnCancelarModalUsuario">Cancelar</button>
+                        <button class="adm-btn-save" id="btnGuardarUsuario"><i class="fas fa-save me-1"></i> Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======== DIRECTORIO — GESTIÓN REAL ======== -->
+        <section class="admin-panel" id="panel-directorio-content">
+            <div class="inner-panel-header">
+                <h2><i class="fas fa-address-book me-2"></i>Gestión de Directorio</h2>
+                <button class="btn-primary-sm" id="btnNuevoContactoDir">
+                    <i class="fas fa-user-plus me-1"></i> Agregar Personal
+                </button>
+            </div>
+            <div class="inner-panel-body">
+                <p class="stats-note"><i class="fas fa-info-circle me-1"></i>
+                    Los registros creados aquí son institucionales y visibles para todos. Para una gestión completa usa el
+                    <a href="dashboard-alumno.html" style="color:#1e2a5a;font-weight:700;">Dashboard Principal <i class="fas fa-external-link-alt"></i></a>.
+                </p>
+
+                <!-- Búsqueda -->
+                <div class="dir-toolbar">
+                    <input type="text" class="users-search" id="dirSearchInput" placeholder="Buscar por nombre o cargo...">
+                    <select class="users-filter" id="dirFilterArea">
+                        <option value="">Todas las áreas</option>
+                        <option value="Académico">Académico</option>
+                        <option value="Administración">Administración</option>
+                        <option value="Servicios">Servicios</option>
+                        <option value="Comunicación">Comunicación</option>
+                    </select>
+                </div>
+
+                <!-- Lista / tabla -->
+                <div class="dir-table-wrap">
+                    <p id="noDirMsg" style="text-align:center;color:#888;padding:24px;display:none;">
+                        No hay personal institucional cargado todavía.
+                    </p>
+                    <table class="users-table" id="dirTable">
+                        <thead>
+                            <tr><th>#</th><th>Nombre</th><th>Tipo</th><th>Cargo / Puesto</th><th>Área</th><th>Correo</th><th>Acciones</th></tr>
+                        </thead>
+                        <tbody id="dirTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Modal Directorio -->
+            <div class="adm-modal-backdrop" id="modalDirBackdrop" style="display:none;">
+                <div class="adm-modal">
+                    <div class="adm-modal-header">
+                        <h3 id="modalDirTitle">Agregar Personal</h3>
+                        <button class="adm-modal-close" id="btnCerrarModalDir"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="adm-modal-body">
+                        <input type="hidden" id="modalDirId">
+                        <div class="adm-form-row">
+                            <div class="adm-form-group">
+                                <label>Nombre Completo *</label>
+                                <input type="text" class="adm-input" id="dirNombre" placeholder="Lic. Juan Pérez">
+                            </div>
+                            <div class="adm-form-group">
+                                <label>Cargo / Puesto *</label>
+                                <input type="text" class="adm-input" id="dirCargo" placeholder="Coordinador de...">
+                            </div>
+                        </div>
+                        <div class="adm-form-row">
+                            <div class="adm-form-group">
+                                <label>Área</label>
+                                <select class="adm-input" id="dirArea">
+                                    <option value="Académico">Académico</option>
+                                    <option value="Administración">Administración</option>
+                                    <option value="Servicios">Servicios</option>
+                                    <option value="Comunicación">Comunicación</option>
+                                </select>
+                            </div>
+                            <div class="adm-form-group">
+                                <label>Correo Institucional</label>
+                                <input type="email" class="adm-input" id="dirCorreo" placeholder="nombre@tec.edu.mx">
+                            </div>
+                        </div>
+                        <div class="adm-form-row">
+                            <div class="adm-form-group">
+                                <label>Teléfono / Extensión</label>
+                                <input type="text" class="adm-input" id="dirTelefono" placeholder="922-123456 ext. 10">
+                            </div>
+                            <div class="adm-form-group">
+                                <label>Especialidad / Materias</label>
+                                <input type="text" class="adm-input" id="dirEspecialidad" placeholder="Matemáticas, Física...">
+                            </div>
+                        </div>
+                        <p id="modalDirError" style="color:#ef4444;font-size:.8rem;display:none;margin-top:4px;"></p>
+                    </div>
+                    <div class="adm-modal-footer">
+                        <button class="adm-btn-cancel" id="btnCancelarModalDir">Cancelar</button>
+                        <button class="adm-btn-save" id="btnGuardarDir"><i class="fas fa-save me-1"></i> Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======== ESTADÍSTICAS Y REPORTES ======== -->
+        <section class="admin-panel" id="panel-estadisticas-content">
+            <div class="inner-panel-header">
+                <h2><i class="fas fa-chart-bar me-2"></i>Estadísticas y Reportes</h2>
+                <button class="btn-primary-sm" id="btnExportarReporte">
+                    <i class="fas fa-download me-1"></i> Exportar Reporte
+                </button>
+            </div>
+            <div class="inner-panel-body">
+                <p class="stats-note"><i class="fas fa-info-circle me-1"></i>
+                    Datos reales del <strong>localStorage</strong> de este navegador. Se actualizan conforme alumnos y visitantes usan el sistema.
+                </p>
+
+                <!-- KPIs de estadísticas -->
+                <div class="stat-kpi-row">
+                    <div class="stat-kpi-card">
+                        <i class="fas fa-eye" style="color:#3b82f6;"></i>
+                        <span class="stat-kpi-num" id="statKpiVisitas">0</span>
+                        <span class="stat-kpi-label">Visitas totales</span>
+                    </div>
+                    <div class="stat-kpi-card">
+                        <i class="fas fa-user-plus" style="color:#10b981;"></i>
+                        <span class="stat-kpi-num" id="statKpiRegistrados">0</span>
+                        <span class="stat-kpi-label">Alumnos registrados</span>
+                    </div>
+                    <div class="stat-kpi-card">
+                        <i class="fas fa-walking" style="color:#a855f7;"></i>
+                        <span class="stat-kpi-num" id="statKpiVisitantes">0</span>
+                        <span class="stat-kpi-label">Visitantes</span>
+                    </div>
+                    <div class="stat-kpi-card">
+                        <i class="fas fa-utensils" style="color:#f97316;"></i>
+                        <span class="stat-kpi-num" id="statKpiMenus">0</span>
+                        <span class="stat-kpi-label">Menús publicados</span>
+                    </div>
+                    <div class="stat-kpi-card">
+                        <i class="fas fa-address-book" style="color:#1e2a5a;"></i>
+                        <span class="stat-kpi-num" id="statKpiContactos">0</span>
+                        <span class="stat-kpi-label">Contactos directorio</span>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <!-- Gráfica -->
+                    <div class="stat-card-lg">
+                        <h4>Visitas por día de la semana</h4>
+                        <div class="chart-bars" id="chartBars"></div>
+                        <div class="chart-labels" id="chartLabels"></div>
+                    </div>
+
+                    <!-- Uso del sistema -->
+                    <div class="stat-card-sm">
+                        <h4>Uso del sistema</h4>
+                        <div class="uso-list" id="usoList">
+                            <div class="uso-item">
+                                <span class="uso-label"><i class="fas fa-sign-in-alt"></i> Inicios de sesión</span>
+                                <span class="uso-val" id="usoLogin">0</span>
+                            </div>
+                            <div class="uso-item">
+                                <span class="uso-label"><i class="fas fa-user-plus"></i> Registros</span>
+                                <span class="uso-val" id="usoRegistros">0</span>
+                            </div>
+                            <div class="uso-item">
+                                <span class="uso-label"><i class="fas fa-map"></i> Visitas Mapa</span>
+                                <span class="uso-val" id="usoMapa">0</span>
+                            </div>
+                            <div class="uso-item">
+                                <span class="uso-label"><i class="fas fa-address-book"></i> Visitas Directorio</span>
+                                <span class="uso-val" id="usoDirectorio">0</span>
+                            </div>
+                            <div class="uso-item">
+                                <span class="uso-label"><i class="fas fa-utensils"></i> Visitas Cafetería</span>
+                                <span class="uso-val" id="usoCafeteria">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reportes de errores -->
+                    <div class="stat-card-sm">
+                        <h4>Reportes de errores</h4>
+                        <div id="erroresList">
+                            <p id="noErroresMsg" style="color:#888;font-size:.8rem;text-align:center;padding:12px;">
+                                <i class="fas fa-check-circle" style="color:#10b981;"></i><br>
+                                Sin errores reportados.
+                            </p>
+                        </div>
+                        <button class="adm-btn-sm-outline" id="btnSimularError" style="margin-top:8px;" title="Simula un error para pruebas">
+                            <i class="fas fa-bug me-1"></i> Reportar error de prueba
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======== BITÁCORA ======== -->
+        <section class="admin-panel" id="panel-bitacora-content">
+            <div class="inner-panel-header">
+                <h2><i class="fas fa-clipboard-list me-2"></i>Bitácora de Actividad</h2>
+            </div>
+            <div class="inner-panel-body">
+                <p class="stats-note"><i class="fas fa-info-circle me-1"></i> Actividad registrada conforme el sistema es utilizado.</p>
+                <ul class="bitacora-list" id="bitacoraList">
+                    <li id="bitVisitas"><span class="bit-time">—</span><span class="bit-icon bit-blue"><i class="fas fa-eye"></i></span><span class="bit-msg" id="bitMsgVisitas">Sin visitas aún.</span></li>
+                    <li id="bitRegistros"><span class="bit-time">—</span><span class="bit-icon bit-green"><i class="fas fa-user-plus"></i></span><span class="bit-msg" id="bitMsgRegistros">Sin alumnos registrados aún.</span></li>
+                    <li id="bitMenus"><span class="bit-time">—</span><span class="bit-icon bit-orange"><i class="fas fa-utensils"></i></span><span class="bit-msg" id="bitMsgMenus">Sin menús publicados aún.</span></li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ======== NOTIFICACIONES ======== -->
+        <section class="admin-panel" id="panel-notificaciones-content">
+            <div class="inner-panel-header">
+                <h2><i class="fas fa-bell me-2"></i>Notificaciones</h2>
+            </div>
+            <div class="inner-panel-body">
+                <!-- Alertas del sistema -->
+                <div class="notif-panel-group">
+                    <h4><i class="fas fa-exclamation-triangle me-2" style="color:#f59e0b;"></i>Alertas del sistema</h4>
+                    <div id="sistemAlertas">
+                        <div class="notif-panel-item notif-item-warn">
+                            <i class="fas fa-user-plus"></i>
+                            <div>
+                                <strong>Registro de nuevos alumnos</strong>
+                                <p id="alertaNuevosAlumnos">Sin registros nuevos en este dispositivo.</p>
+                            </div>
+                            <span class="notif-time">—</span>
+                        </div>
+                        <div class="notif-panel-item notif-item-info">
+                            <i class="fas fa-utensils"></i>
+                            <div>
+                                <strong>Menús de cafetería</strong>
+                                <p id="alertaMenus">Sin menús publicados aún.</p>
+                            </div>
+                            <span class="notif-time">—</span>
+                        </div>
+                        <div class="notif-panel-item notif-item-blue">
+                            <i class="fas fa-eye"></i>
+                            <div>
+                                <strong>Actividad de visitas</strong>
+                                <p id="alertaVisitas">Sin visitas registradas aún.</p>
+                            </div>
+                            <span class="notif-time">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Solicitudes pendientes (nuevos registros) -->
+                <div class="notif-panel-group">
+                    <h4><i class="fas fa-clock me-2" style="color:#3b82f6;"></i>Solicitudes pendientes</h4>
+                    <p style="font-size:.82rem;color:#64748b;margin-bottom:10px;">
+                        Alumnos que se han registrado recientemente y requieren revisión.
+                    </p>
+                    <div id="solicitudesPendientes">
+                        <p style="color:#888;font-size:.8rem;text-align:center;padding:12px 0;">
+                            <i class="fas fa-check-circle" style="color:#10b981;"></i> Sin solicitudes pendientes.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Mensajes de usuarios -->
+                <div class="notif-panel-group">
+                    <h4><i class="fas fa-envelope me-2" style="color:#8b5cf6;"></i>Mensajes de usuarios</h4>
+                    <p style="font-size:.82rem;color:#64748b;margin-bottom:10px;">
+                        Reportes y mensajes enviados desde Soporte Técnico por alumnos y visitantes.
+                    </p>
+                    <div id="mensajesUsuarios">
+                        <p style="color:#888;font-size:.8rem;text-align:center;padding:12px 0;">Sin mensajes recibidos.</p>
+                    </div>
+                    <button class="adm-btn-sm-outline" onclick="navegarPanel('soporte-content')" style="margin-top:8px;">
+                        <i class="fas fa-headset me-1"></i> Ver todos en Soporte Técnico
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======== SEGURIDAD ======== -->
+        <section class="admin-panel" id="panel-seguridad-content">
+            <div class="inner-panel-header">
+                <h2><i class="fas fa-lock me-2"></i>Seguridad</h2>
+            </div>
+            <div class="inner-panel-body">
+                <div class="seg-grid">
+
+                    <!-- Cambio de contraseña -->
+                    <div class="seg-card">
+                        <h4><i class="fas fa-key me-2" style="color:#f59e0b;"></i>Cambiar contraseña</h4>
+                        <div class="adm-form-group" style="margin-bottom:10px;">
+                            <label>Contraseña actual</label>
+                            <input type="password" class="adm-input" id="segPassActual" placeholder="••••••••">
+                        </div>
+                        <div class="adm-form-group" style="margin-bottom:10px;">
+                            <label>Nueva contraseña</label>
+                            <input type="password" class="adm-input" id="segPassNueva" placeholder="••••••••">
+                        </div>
+                        <div class="adm-form-group" style="margin-bottom:14px;">
+                            <label>Confirmar nueva contraseña</label>
+                            <input type="password" class="adm-input" id="segPassConfirm" placeholder="••••••••">
+                        </div>
+                        <button class="adm-btn-save" id="btnCambiarPassAdmin" style="width:100%;">
+                            <i class="fas fa-save me-1"></i> Actualizar contraseña
+                        </button>
+                        <p id="segPassMsg" style="display:none;margin-top:8px;font-size:.8rem;text-align:center;"></p>
+                    </div>
+
+                    <div style="display:flex;flex-direction:column;gap:14px;">
+
+                        <!-- Historial de accesos -->
+                        <div class="seg-card">
+                            <h4><i class="fas fa-history me-2" style="color:#3b82f6;"></i>Historial de accesos</h4>
+                            <div id="historialAccesos">
+                                <p style="color:#888;font-size:.8rem;text-align:center;padding:8px 0;">Sin historial en este dispositivo.</p>
+                            </div>
+                        </div>
+
+                        <!-- Control de permisos de perfil -->
+                        <div class="seg-card">
+                            <h4><i class="fas fa-id-badge me-2" style="color:#10b981;"></i>Control de permisos de perfil</h4>
+                            <p style="font-size:.82rem;color:#64748b;margin-bottom:10px;">
+                                Controla el acceso al perfil para cada alumno registrado.
+                            </p>
+                            <div id="permisosPerfilLista">
+                                <p style="color:#888;font-size:.8rem;text-align:center;padding:8px 0;">Sin alumnos registrados aún.</p>
+                            </div>
+                            <button class="adm-btn-sm-outline" onclick="navegarPanel('usuarios-content')" style="margin-top:8px;">
+                                <i class="fas fa-users me-1"></i> Gestionar en Usuarios
+                            </button>
+                        </div>
+
+                        <!-- Autenticación 2FA -->
+                        <div class="seg-card">
+                            <h4><i class="fas fa-mobile-alt me-2" style="color:#8b5cf6;"></i>Autenticación (2FA)</h4>
+                            <p style="font-size:.82rem;color:#64748b;margin-bottom:12px;">
+                                Agrega una capa de seguridad adicional a tu cuenta de administrador.
+                            </p>
+                            <div class="seg-toggle-row">
+                                <div>
+                                    <strong style="font-size:.87rem;">Activar 2FA para Admin</strong>
+                                    <p style="font-size:.78rem;color:#888;margin:2px 0 0;">Se pedirá un código al iniciar sesión.</p>
+                                </div>
+                                <label class="adm-toggle-mini">
+                                    <input type="checkbox" id="toggle2FAAdmin" onchange="toggle2FA('admin', this.checked)">
+                                    <span class="adm-toggle-slider-mini"></span>
+                                </label>
+                            </div>
+                            <div class="seg-toggle-row" style="margin-top:10px;">
+                                <div>
+                                    <strong style="font-size:.87rem;">Permitir 2FA para Alumnos</strong>
+                                    <p style="font-size:.78rem;color:#888;margin:2px 0 0;">Los alumnos podrán activar 2FA en su perfil.</p>
+                                </div>
+                                <label class="adm-toggle-mini">
+                                    <input type="checkbox" id="toggle2FAAlumnos" onchange="toggle2FA('alumnos', this.checked)">
+                                    <span class="adm-toggle-slider-mini"></span>
+                                </label>
+                            </div>
+                            <p id="seg2FAMsg" style="display:none;margin-top:8px;font-size:.8rem;text-align:center;color:#10b981;"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======== CONFIGURACIÓN ======== -->
+        <section class="admin-panel" id="panel-configuracion-content">
+            <div class="inner-panel-header">
+                <h2><i class="fas fa-cog me-2"></i>Configuración del Sistema</h2>
+            </div>
+            <div class="inner-panel-body">
+
+                <!-- Información del sitio -->
+                <div class="config-group">
+                    <h4>Información del Sitio</h4>
+                    <div class="config-row">
+                        <label>Nombre del sitio</label>
+                        <input type="text" class="config-input" id="cfgNombreSitio" value="CONOCE-TEC">
+                    </div>
+                    <div class="config-row">
+                        <label>Institución</label>
+                        <input type="text" class="config-input" id="cfgInstitucion" value="Instituto Tecnológico de Minatitlán">
+                    </div>
+                </div>
+
+                <!-- Acceso admin -->
+                <div class="config-group">
+                    <h4>Acceso de Administrador</h4>
+                    <div class="config-row">
+                        <label>Usuario administrador actual</label>
+                        <input type="text" class="config-input" id="cfgAdminUsuario" value="admin" readonly>
+                    </div>
+                </div>
+
+                <!-- Módulos visibles -->
+                <div class="config-group">
+                    <h4>Configurar módulos visibles</h4>
+                    <p style="font-size:.82rem;color:#64748b;margin-bottom:12px;">Activa o desactiva qué secciones son visibles para Alumnos y Visitantes.</p>
+                    <div class="cfg-modules-grid" id="cfgModulesGrid">
+                        <div class="cfg-module-row">
+                            <div><strong>Inicio</strong><p>Página de bienvenida e información</p></div>
+                            <label class="adm-toggle-mini"><input type="checkbox" checked data-modulo="inicio" onchange="guardarModulo(this)"><span class="adm-toggle-slider-mini"></span></label>
+                        </div>
+                        <div class="cfg-module-row">
+                            <div><strong>Mapa</strong><p>Mapa del campus interactivo</p></div>
+                            <label class="adm-toggle-mini"><input type="checkbox" checked data-modulo="mapa" onchange="guardarModulo(this)"><span class="adm-toggle-slider-mini"></span></label>
+                        </div>
+                        <div class="cfg-module-row">
+                            <div><strong>Directorio</strong><p>Contactos institucionales y personales</p></div>
+                            <label class="adm-toggle-mini"><input type="checkbox" checked data-modulo="directorio" onchange="guardarModulo(this)"><span class="adm-toggle-slider-mini"></span></label>
+                        </div>
+                        <div class="cfg-module-row">
+                            <div><strong>Cafetería</strong><p>Menús y opciones del día</p></div>
+                            <label class="adm-toggle-mini"><input type="checkbox" checked data-modulo="cafeteria" onchange="guardarModulo(this)"><span class="adm-toggle-slider-mini"></span></label>
+                        </div>
+                        <div class="cfg-module-row">
+                            <div><strong>Soporte Técnico</strong><p>Formulario de reporte de problemas</p></div>
+                            <label class="adm-toggle-mini"><input type="checkbox" checked data-modulo="soporte" onchange="guardarModulo(this)"><span class="adm-toggle-slider-mini"></span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activar/desactivar funciones -->
+                <div class="config-group">
+                    <h4>Activar / desactivar funciones</h4>
+                    <div class="cfg-module-row">
+                        <div><strong>Registro de alumnos</strong><p>Permitir que nuevos alumnos se registren</p></div>
+                        <label class="adm-toggle-mini"><input type="checkbox" checked data-funcion="registro" onchange="guardarFuncion(this)"><span class="adm-toggle-slider-mini"></span></label>
+                    </div>
+                    <div class="cfg-module-row">
+                        <div><strong>Acceso de visitantes</strong><p>Permitir acceso a usuarios no registrados</p></div>
+                        <label class="adm-toggle-mini"><input type="checkbox" checked data-funcion="visitantes" onchange="guardarFuncion(this)"><span class="adm-toggle-slider-mini"></span></label>
+                    </div>
+                    <div class="cfg-module-row">
+                        <div><strong>Comentarios en cafetería</strong><p>Alumnos y visitantes pueden dejar opiniones</p></div>
+                        <label class="adm-toggle-mini"><input type="checkbox" checked data-funcion="comentarios" onchange="guardarFuncion(this)"><span class="adm-toggle-slider-mini"></span></label>
+                    </div>
+                    <div class="cfg-module-row">
+                        <div><strong>Edición del directorio</strong><p>Alumnos pueden agregar contactos personales</p></div>
+                        <label class="adm-toggle-mini"><input type="checkbox" checked data-funcion="dir-edicion" onchange="guardarFuncion(this)"><span class="adm-toggle-slider-mini"></span></label>
+                    </div>
+                </div>
+
+                <!-- Personalizar apariencia -->
+                <div class="config-group">
+                    <h4>Personalizar apariencia básica</h4>
+                    <div class="config-row">
+                        <label>Color primario del sitio</label>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <input type="color" id="cfgColorPrimario" value="#1a3a6b"
+                                style="width:40px;height:32px;border:none;border-radius:6px;cursor:pointer;padding:2px;">
+                            <span style="font-size:.82rem;color:#64748b;">Color principal de la interfaz</span>
+                        </div>
+                    </div>
+                    <div class="config-row">
+                        <label>Modo predeterminado</label>
+                        <select class="config-input" id="cfgModoDefault" style="max-width:200px;">
+                            <option value="claro">Modo claro</option>
+                            <option value="oscuro">Modo oscuro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn-save-config" id="btnGuardarConfigSistema">
+                    <i class="fas fa-save me-1"></i> Guardar cambios
+                </button>
+                <p id="cfgSistemaMsg" style="display:none;margin-top:8px;font-size:.82rem;text-align:center;color:#10b981;"></p>
+            </div>
+        </section>
+
+        <!-- ======== RESPALDOS ======== -->
+        <section class="admin-panel" id="panel-respaldos-content">
+            <div class="inner-panel-header">
+                <h2><i class="fas fa-database me-2"></i>Respaldos del Sistema</h2>
+            </div>
+            <div class="inner-panel-body">
+                <div class="backup-info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <strong>¿Qué es el respaldo?</strong>
+                        <p>Genera un archivo <code>.json</code> con todos los datos guardados en este navegador: visitas, alumnos registrados, visitantes y contactos del directorio. Es un respaldo del <strong>localStorage</strong> de este dispositivo.</p>
+                    </div>
+                </div>
+                <div class="backup-actions" style="margin-top:16px;">
+                    <button class="backup-btn primary" id="btnGenerarRespaldo">
+                        <i class="fas fa-download me-2"></i> Generar Respaldo Ahora
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======== ROLES ======== -->
+        <section class="admin-panel" id="panel-roles-content">
+            <div class="inner-panel-header">
+                <h2><i class="fas fa-shield-alt me-2"></i>Roles y Permisos</h2>
+            </div>
+            <div class="inner-panel-body">
+                <div class="roles-grid">
+                    <div class="role-card">
+                        <i class="fas fa-user-shield"></i>
+                        <h4>Administrador</h4>
+                        <p>Acceso completo: usuarios, contenido, estadísticas, configuración y respaldos.</p>
+                    </div>
+                    <div class="role-card">
+                        <i class="fas fa-edit"></i>
+                        <h4>Editor</h4>
+                        <p>Puede editar contenido del sitio (inicio, mapa, directorio, cafetería).</p>
+                    </div>
+                    <div class="role-card">
+                        <i class="fas fa-search"></i>
+                        <h4>Supervisor</h4>
+                        <p>Solo visualización de estadísticas y reportes.</p>
+                    </div>
+                    <div class="role-card">
+                        <i class="fas fa-headset"></i>
+                        <h4>Soporte Técnico</h4>
+                        <p>Acceso a bitácora, reportes de errores y configuración técnica.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======== SOPORTE TÉCNICO ======== -->
+        <section class="admin-panel" id="panel-soporte-content">
+            <div class="inner-panel-header">
+                <h2><i class="fas fa-headset me-2"></i>Soporte Técnico</h2>
+            </div>
+            <div class="inner-panel-body">
+                <div class="soporte-grid">
+                    <!-- Formulario de reporte -->
+                    <div class="soporte-card">
+                        <h4><i class="fas fa-bug me-2" style="color:#ef4444;"></i>Reportar un problema</h4>
+                        <p style="font-size:.82rem;color:#64748b;margin-bottom:14px;">
+                            Describe el problema que encontraste para que el equipo técnico pueda revisarlo.
+                        </p>
+                        <div class="adm-form-group" style="margin-bottom:10px;">
+                            <label>Tipo de problema</label>
+                            <select class="adm-input" id="soporteTipo">
+                                <option value="Error en pantalla">Error en pantalla</option>
+                                <option value="Datos incorrectos">Datos incorrectos</option>
+                                <option value="Acceso denegado">Acceso denegado</option>
+                                <option value="Lentitud del sistema">Lentitud del sistema</option>
+                                <option value="Función no disponible">Función no disponible</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="adm-form-group" style="margin-bottom:10px;">
+                            <label>Pantalla / sección afectada</label>
+                            <input type="text" class="adm-input" id="soportePantalla" placeholder="Ej: Dashboard, Directorio, Cafetería...">
+                        </div>
+                        <div class="adm-form-group" style="margin-bottom:14px;">
+                            <label>Descripción del problema *</label>
+                            <textarea class="adm-input" id="soporteDescripcion" rows="4"
+                                placeholder="Describe qué ocurrió, qué esperabas que pasara y los pasos para reproducirlo..."></textarea>
+                        </div>
+                        <button class="adm-btn-save" id="btnEnviarReporte" style="width:100%;">
+                            <i class="fas fa-paper-plane me-1"></i> Enviar Reporte
+                        </button>
+                        <p id="soporteMsg" style="display:none;margin-top:10px;font-size:.82rem;text-align:center;"></p>
+                    </div>
+
+                    <!-- Info de contacto y reportes enviados -->
+                    <div style="display:flex;flex-direction:column;gap:14px;">
+                        <!-- Contacto -->
+                        <div class="soporte-card">
+                            <h4><i class="fas fa-phone me-2" style="color:#3b82f6;"></i>Contacto directo</h4>
+                            <ul class="soporte-contact-list">
+                                <li><i class="fas fa-envelope"></i><span>soporte@tec.edu.mx</span></li>
+                                <li><i class="fas fa-phone"></i><span>922-123-456 ext. 100</span></li>
+                                <li><i class="fas fa-clock"></i><span>Lunes a Viernes, 8:00 a.m. – 5:00 p.m.</span></li>
+                                <li><i class="fas fa-map-marker-alt"></i><span>Edificio de Sistemas, Planta baja</span></li>
+                            </ul>
+                        </div>
+                        <!-- Reportes guardados -->
+                        <div class="soporte-card">
+                            <h4><i class="fas fa-list-alt me-2" style="color:#f97316;"></i>Reportes enviados</h4>
+                            <div id="reportesEnviados">
+                                <p style="color:#888;font-size:.8rem;text-align:center;padding:10px 0;">Sin reportes enviados.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======== MAPA (Opción futura) ======== -->
+        <section class="admin-panel" id="panel-mapa-content">
+            <div class="inner-panel-header"><h2><i class="fas fa-map-marked-alt me-2"></i>Mapa del Campus</h2></div>
+            <div class="inner-panel-body" style="padding:0; overflow:hidden; border-radius:0 0 12px 12px;">
+                <div style="width:100%; height:calc(100vh - 120px); min-height:520px; overflow:hidden;">
+                    <iframe
+                        id="iframeMapa"
+                        src="mapa-campus.html"
+                        style="width:100%; height:100%; border:none; display:block;"
+                        allow="geolocation"
+                        loading="lazy"
+                        title="Mapa interactivo del campus ITMI"
+                    ></iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- ======== INICIO / CAFETERÍA ======== -->
+        <section class="admin-panel" id="panel-inicio-content">
+            <div class="inner-panel-header"><h2><i class="fas fa-home me-2"></i>Gestión de Inicio</h2></div>
+            <div class="inner-panel-body"><div class="redirect-notice">
+                <i class="fas fa-external-link-alt" style="font-size:2.5rem;color:#3b82f6;margin-bottom:12px;"></i>
+                <h4>Gestionar Inicio — Dashboard Principal</h4>
+                <p>Edita el mural, misión, visión, historia y datos de contacto desde el Dashboard Principal.</p>
+                <a href="dashboard-alumno.html" class="btn-go-dashboard"><i class="fas fa-arrow-right me-2"></i> Abrir Dashboard Principal</a>
+            </div></div>
+        </section>
+
+        <section class="admin-panel" id="panel-cafeteria-content">
+            <div class="inner-panel-header"><h2><i class="fas fa-utensils me-2"></i>Gestión de Cafetería</h2></div>
+            <div class="inner-panel-body"><div class="redirect-notice">
+                <i class="fas fa-external-link-alt" style="font-size:2.5rem;color:#f97316;margin-bottom:12px;"></i>
+                <h4>Cafetería — Dashboard Principal</h4>
+                <p>Publica y administra el menú del día desde el dashboard principal.</p>
+                <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                    <a href="dashboard-alumno.html" class="btn-go-dashboard"><i class="fas fa-arrow-right me-2"></i> Abrir Dashboard Principal</a>
+                    <a href="cafeteria-admin.html" class="btn-go-dashboard" style="background:#f97316;"><i class="fas fa-upload me-2"></i> Subir Menú del Día</a>
+                </div>
+            </div></div>
+        </section>
+
+    </div><!-- /.panel-content -->
+
+    <footer class="admin-footer">
+        <span>© 2025 Instituto Tecnológico. Todos los derechos reservados.</span>
+        <span>Versión 1.0.0</span>
+    </footer>
+</div><!-- /.admin-main -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/script-dashboard-admin.js"></script>
+<script>
+// Actualizar actividad reciente con datos reales en tiempo real
+(function() {
+    function actualizarActividadReciente() {
+        var visitas     = parseInt(localStorage.getItem('contadorVisitas')     || '0', 10);
+        var registrados = parseInt(localStorage.getItem('contadorRegistrados') || '0', 10);
+        var menus       = JSON.parse(localStorage.getItem('menusCafeteria')    || '[]');
+        var ultimo      = localStorage.getItem('ultimoUsuarioRegistrado') || '—';
+
+        var actVisitas     = document.getElementById('actVisitas');
+        var actRegistrados = document.getElementById('actRegistrados');
+        var actMenus       = document.getElementById('actMenus');
+        var actNuevo       = document.getElementById('actNuevoUsuario');
+
+        if (actVisitas)     actVisitas.textContent     = visitas + ' visita(s) registrada(s) en total.';
+        if (actRegistrados) actRegistrados.textContent = registrados + ' alumno(s) en el sistema.';
+        if (actMenus)       actMenus.textContent       = menus.length + ' menú(s) publicado(s).';
+        if (actNuevo)       actNuevo.textContent       = ultimo;
+
+        // Bitácora
+        var bitMsgV = document.getElementById('bitMsgVisitas');
+        var bitMsgR = document.getElementById('bitMsgRegistros');
+        var bitMsgM = document.getElementById('bitMsgMenus');
+        if (bitMsgV) bitMsgV.textContent = visitas > 0     ? visitas + ' visita(s) acumuladas en el sistema.' : 'Sin visitas aún.';
+        if (bitMsgR) bitMsgR.textContent = registrados > 0 ? registrados + ' alumno(s) se han registrado.' : 'Sin alumnos registrados aún.';
+        if (bitMsgM) bitMsgM.textContent = menus.length > 0 ? menus.length + ' menú(s) publicado(s) en cafetería.' : 'Sin menús publicados aún.';
+
+        // Estadísticas
+        var sVT = document.getElementById('statVisTotal');
+        var sRT = document.getElementById('statRegTotal');
+        var sVis= document.getElementById('statVisitantesTotal');
+        var sM  = document.getElementById('statMenus');
+        var sC  = document.getElementById('statContactos');
+        var visitantesArr = JSON.parse(localStorage.getItem('visitantesRegistrados') || '[]');
+        var contactosArr  = JSON.parse(localStorage.getItem('contactosTECAdmin')    || '[]');
+        if (sVT)  sVT.textContent  = visitas;
+        if (sRT)  sRT.textContent  = registrados;
+        if (sVis) sVis.textContent = visitantesArr.length;
+        if (sM)   sM.textContent   = menus.length + ' publicado(s)';
+        if (sC)   sC.textContent   = contactosArr.length + ' en directorio';
+
+        // Resumen del sistema
+        var resumC = document.getElementById('resumContactos');
+        if (resumC) resumC.textContent = contactosArr.length + ' contacto(s)';
+    }
+
+    document.addEventListener('DOMContentLoaded', actualizarActividadReciente);
+    window.addEventListener('storage', actualizarActividadReciente);
+    setInterval(actualizarActividadReciente, 10000); // cada 10 segundos
+})();
+</script>
+<!-- ===== ESTILOS: NOTIFICACIONES + SEGURIDAD + CONFIGURACIÓN ===== -->
+<style>
+/* ---- Notificaciones panel ---- */
+.notif-panel-group {
+    background: #fff;
+    border: 1px solid #e8ecf5;
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(30,42,90,0.05);
+}
+.notif-panel-group h4 {
+    font-size: .92rem;
+    font-weight: 700;
+    color: #1e2a5a;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+}
+.notif-panel-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    font-size: .82rem;
+}
+.notif-panel-item:last-child { margin-bottom: 0; }
+.notif-panel-item i { font-size: 1.1rem; margin-top: 2px; flex-shrink: 0; }
+.notif-panel-item div { flex: 1; }
+.notif-panel-item strong { display: block; font-size: .85rem; margin-bottom: 2px; }
+.notif-panel-item p { margin: 0; color: #64748b; }
+.notif-time { font-size: .72rem; color: #94a3b8; white-space: nowrap; }
+.notif-item-warn { background: #fffbeb; }
+.notif-item-warn i { color: #f59e0b; }
+.notif-item-info { background: #fff7f0; }
+.notif-item-info i { color: #f97316; }
+.notif-item-blue { background: #eff6ff; }
+.notif-item-blue i { color: #3b82f6; }
+.snav-badge {
+    background: #ef4444;
+    color: #fff;
+    font-size: .65rem;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 1px 6px;
+    margin-left: auto;
+    min-width: 18px;
+    text-align: center;
+}
+.solicitud-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border: 1px solid #e8ecf5;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    font-size: .82rem;
+}
+.solicitud-item .sol-info { flex: 1; }
+.solicitud-item .sol-nombre { font-weight: 700; color: #1e2a5a; font-size: .85rem; }
+.solicitud-item .sol-fecha { color: #94a3b8; font-size: .72rem; }
+.solicitud-item .sol-badge { background: #fef3c7; color: #92400e; font-size: .68rem; font-weight: 700; padding: 2px 7px; border-radius: 99px; }
+
+/* ---- Seguridad panel ---- */
+.seg-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+@media (max-width: 700px) { .seg-grid { grid-template-columns: 1fr; } }
+.seg-card {
+    background: #fff;
+    border: 1px solid #e8ecf5;
+    border-radius: 14px;
+    padding: 18px 20px;
+    box-shadow: 0 2px 8px rgba(30,42,90,0.05);
+}
+.seg-card h4 { font-size: .92rem; font-weight: 700; color: #1e2a5a; margin-bottom: 12px; display: flex; align-items: center; }
+.seg-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f2f8;
+    gap: 12px;
+}
+.seg-toggle-row:last-child { border-bottom: none; }
+.historial-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f2f8;
+    font-size: .8rem;
+    color: #334155;
+}
+.historial-item:last-child { border-bottom: none; }
+.historial-item i { color: #10b981; width: 16px; }
+.permiso-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid #f0f2f8;
+    font-size: .8rem;
+    gap: 8px;
+}
+.permiso-item:last-child { border-bottom: none; }
+.permiso-item .perm-nombre { font-weight: 600; color: #1e2a5a; font-size: .82rem; }
+.permiso-item .perm-correo { color: #94a3b8; font-size: .72rem; }
+
+/* ---- Configuración expandida ---- */
+.cfg-modules-grid { display: flex; flex-direction: column; gap: 0; }
+.cfg-module-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 0;
+    border-bottom: 1px solid #f0f2f8;
+    gap: 12px;
+}
+.cfg-module-row:last-child { border-bottom: none; }
+.cfg-module-row > div { flex: 1; }
+.cfg-module-row strong { display: block; font-size: .87rem; color: #1e2a5a; }
+.cfg-module-row p { margin: 2px 0 0; font-size: .78rem; color: #64748b; }
+
+/* Dark mode for new panels */
+body.dark-mode .notif-panel-group,
+body.dark-mode .seg-card { background: #1e293b !important; border-color: #334155 !important; }
+body.dark-mode .notif-panel-group h4,
+body.dark-mode .seg-card h4 { color: #f1f5f9 !important; }
+body.dark-mode .notif-item-warn { background: #2d1f00 !important; }
+body.dark-mode .notif-item-info { background: #1f1500 !important; }
+body.dark-mode .notif-item-blue { background: #0a1628 !important; }
+body.dark-mode .notif-panel-item p { color: #94a3b8 !important; }
+body.dark-mode .solicitud-item { background: #0f172a !important; border-color: #334155 !important; }
+body.dark-mode .solicitud-item .sol-nombre { color: #f1f5f9 !important; }
+body.dark-mode .seg-toggle-row { border-color: #334155 !important; }
+body.dark-mode .historial-item { border-color: #334155 !important; color: #cbd5e1 !important; }
+body.dark-mode .permiso-item { border-color: #334155 !important; }
+body.dark-mode .permiso-item .perm-nombre { color: #f1f5f9 !important; }
+body.dark-mode .cfg-module-row { border-color: #334155 !important; }
+body.dark-mode .cfg-module-row strong { color: #f1f5f9 !important; }
+body.dark-mode .cfg-module-row p { color: #64748b !important; }
+</style>
+
+<!-- ===== ESTILOS: MODO OSCURO + BOTÓN TOPBAR + TOGGLE PERFIL ===== -->
+<style>
+/* Botón modo oscuro en topbar */
+.topbar-dark-btn {
+    background: transparent;
+    border: 1.5px solid rgba(255,255,255,0.25);
+    color: #fff;
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background 0.2s, border-color 0.2s;
+    margin-right: 4px;
+}
+.topbar-dark-btn:hover {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.5);
+}
+
+/* Toggle mini para columna de perfil */
+.adm-toggle-mini {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 22px;
+    cursor: pointer;
+}
+.adm-toggle-mini input { opacity: 0; width: 0; height: 0; }
+.adm-toggle-slider-mini {
+    position: absolute;
+    inset: 0;
+    background: #ccc;
+    border-radius: 22px;
+    transition: background 0.25s;
+}
+.adm-toggle-slider-mini::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 3px;
+    top: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.25s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.adm-toggle-mini input:checked + .adm-toggle-slider-mini { background: #10b981; }
+.adm-toggle-mini input:checked + .adm-toggle-slider-mini::before { transform: translateX(18px); }
+
+/* ===== MODO OSCURO — ADMIN ===== */
+body.dark-mode {
+    background: #0f172a !important;
+    color: #e2e8f0 !important;
+}
+body.dark-mode .admin-sidebar {
+    background: #1e293b !important;
+    border-right-color: #334155 !important;
+}
+body.dark-mode .snav-item { color: #cbd5e1 !important; }
+body.dark-mode .snav-item:hover,
+body.dark-mode .snav-item.active { background: #2d4a8a !important; color: #fff !important; }
+body.dark-mode .admin-topbar { background: linear-gradient(90deg, #1e3a6e, #2d4499) !important; }
+body.dark-mode .panel-content { background: #0f172a !important; }
+body.dark-mode .admin-panel { background: #0f172a !important; }
+body.dark-mode .inner-panel-header { background: #1e293b !important; border-bottom-color: #334155 !important; }
+body.dark-mode .inner-panel-header h2 { color: #e2e8f0 !important; }
+body.dark-mode .inner-panel-body { background: #0f172a !important; }
+body.dark-mode .kpi-card { background: #1e293b !important; border-color: #334155 !important; }
+body.dark-mode .kpi-label,
+body.dark-mode .kpi-sub { color: #94a3b8 !important; }
+body.dark-mode .kpi-value { color: #f1f5f9 !important; }
+body.dark-mode .ql-card,
+body.dark-mode .activity-card,
+body.dark-mode .stat-card-sm,
+body.dark-mode .role-card,
+body.dark-mode .soporte-card,
+body.dark-mode .backup-info-box {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+}
+body.dark-mode .adm-input {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+}
+body.dark-mode .users-table thead { background: #1e293b !important; }
+body.dark-mode .users-table th { color: #94a3b8 !important; border-color: #334155 !important; }
+body.dark-mode .users-table td { border-color: #1e293b !important; color: #e2e8f0 !important; }
+body.dark-mode .users-table tr:hover { background: #1e293b !important; }
+body.dark-mode .users-search,
+body.dark-mode .users-filter,
+body.dark-mode .config-input {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+}
+body.dark-mode .config-group { border-color: #334155 !important; }
+body.dark-mode .config-group h4 { color: #94a3b8 !important; }
+body.dark-mode .sidebar-label-text { color: #64748b !important; }
+body.dark-mode .sidebar-sub-text { color: #64748b !important; }
+body.dark-mode .adm-modal { background: #1e293b !important; border-color: #334155 !important; }
+body.dark-mode .adm-modal-header { background: linear-gradient(90deg,#1e2a5a,#2d4499) !important; }
+body.dark-mode .adm-modal-footer { background: #0f172a !important; border-color: #334155 !important; }
+body.dark-mode label { color: #94a3b8 !important; }
+body.dark-mode .ustat-card { background: #1e293b !important; border-color: #334155 !important; }
+body.dark-mode .ustat-label { color: #94a3b8 !important; }
+body.dark-mode .bitacora-list li { border-color: #1e293b !important; }
+body.dark-mode .soporte-contact-list li { border-color: #334155 !important; color: #cbd5e1 !important; }
+body.dark-mode .dir-table-wrap { background: #1e293b !important; }
+</style>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "conoce-tec-v72",
+  "version": "7.2.0",
+  "description": "Sistema de información del Instituto Tecnológico de Minatitlán",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["mapa", "leaflet", "geojson", "tecnm", "minatitlan", "waze"],
+  "author": "TecNM campus Minatitlán",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
