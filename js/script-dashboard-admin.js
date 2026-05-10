@@ -109,8 +109,18 @@ document.addEventListener('DOMContentLoaded', function () {
     if (btnMarcar) {
         btnMarcar.addEventListener('click', function () {
             document.querySelectorAll('.notif-item.unread').forEach(function (el) { el.classList.remove('unread'); });
+            // Limpiar badge de la campanita
             var badge = document.getElementById('notifBadge');
             if (badge) badge.style.display = 'none';
+            // Guardar cuántos alumnos había al marcar leídas
+            var alumnos = JSON.parse(localStorage.getItem('alumnosRegistrados') || '[]');
+            localStorage.setItem('solicitudesLeidasHasta', String(alumnos.length));
+            // Limpiar badge del menú lateral
+            var snavBadge = document.getElementById('snavNotifBadge');
+            if (snavBadge) snavBadge.style.display = 'none';
+            // Limpiar sección solicitudes
+            var solEl = document.getElementById('solicitudesPendientes');
+            if (solEl) solEl.innerHTML = '<p style="color:#888;font-size:.8rem;text-align:center;padding:12px 0;"><i class="fas fa-check-circle" style="color:#10b981;"></i> Sin solicitudes pendientes.</p>';
         });
     }
 
@@ -255,6 +265,9 @@ function actualizarKPIs() {
     fetch('/api/visits').then(r => r.json()).then(function(v) {
         visitas = v.total || 0;
         var hoy = v.hoy || 0;
+        // Guardar en localStorage como caché local
+        localStorage.setItem('contadorVisitas', String(visitas));
+        localStorage.setItem('contadorVisitasHoy', String(hoy));
         set('kpiVisitasTotales', visitas);
         set('kpiVisitasHoy', hoy);
         setText('resumVisitas', visitas > 0 ? visitas + ' visita(s)' : 'Sin visitas aún');
@@ -263,7 +276,11 @@ function actualizarKPIs() {
         setText2('statVisTotal', String(visitas));
         bit('bitMsgVisitas', visitas > 0 ? visitas + ' visita(s) acumuladas.' : 'Sin visitas aún.');
     }).catch(function() {
+        // Usar caché local si no hay servidor
         visitas = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
+        var hoyLocal = parseInt(localStorage.getItem('contadorVisitasHoy') || '0', 10);
+        set('kpiVisitasTotales', visitas);
+        set('kpiVisitasHoy', hoyLocal);
     });
     var menus       = JSON.parse(localStorage.getItem('menusCafeteria')    || '[]');
     var contactos   = JSON.parse(localStorage.getItem('contactosTECAdmin') || '[]');
@@ -275,10 +292,6 @@ function actualizarKPIs() {
     set('kpiUsuariosReg',    registrados);
     set('kpiMenus',          menus.length);
     set('kpiContactos',      contactos.filter(function(c){return !c.esInstitucional;}).length);
-
-    // Visitas a sección Cafetería (contadas en localStorage por alumno/visitante)
-    var visitasCafe = parseInt(localStorage.getItem('visitasCafeteria') || '0', 10);
-    set('kpiVisitasCafeteria', visitasCafe);
 
     var hoy = new Date().toDateString();
     if (localStorage.getItem('ultimoDiaVisita') !== hoy) {
@@ -512,6 +525,9 @@ function generarNotificaciones() {
     fetch('/api/visits').then(r => r.json()).then(function(v) {
         visitas = v.total || 0;
         var hoy = v.hoy || 0;
+        // Guardar en localStorage como caché local
+        localStorage.setItem('contadorVisitas', String(visitas));
+        localStorage.setItem('contadorVisitasHoy', String(hoy));
         set('kpiVisitasTotales', visitas);
         set('kpiVisitasHoy', hoy);
         setText('resumVisitas', visitas > 0 ? visitas + ' visita(s)' : 'Sin visitas aún');
@@ -520,7 +536,11 @@ function generarNotificaciones() {
         setText2('statVisTotal', String(visitas));
         bit('bitMsgVisitas', visitas > 0 ? visitas + ' visita(s) acumuladas.' : 'Sin visitas aún.');
     }).catch(function() {
+        // Usar caché local si no hay servidor
         visitas = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
+        var hoyLocal = parseInt(localStorage.getItem('contadorVisitasHoy') || '0', 10);
+        set('kpiVisitasTotales', visitas);
+        set('kpiVisitasHoy', hoyLocal);
     });
     var errores     = JSON.parse(localStorage.getItem('reportesError')     || '[]');
     var notifs = [];
@@ -624,12 +644,15 @@ function cargarTablaUsuarios() {
 
     var alumnos    = todosUsuarios.filter(function(u){ return u.tipo==='alumno'; }).length;
     var visitantes = todosUsuarios.filter(function(u){ return u.tipo==='visitante'; }).length;
-    var ustatA = document.getElementById('ustatAlumnos');
-    var ustatV = document.getElementById('ustatVisitantes');
-    var ustatB = document.getElementById('ustatBloqueados');
-    if (ustatA) ustatA.textContent = alumnos;
-    if (ustatV) ustatV.textContent = visitantes;
-    if (ustatB) ustatB.textContent = bloqueados.length;
+    var admins     = todosUsuarios.filter(function(u){ return u.tipo==='admin'; }).length;
+    var ustatA  = document.getElementById('ustatAlumnos');
+    var ustatV  = document.getElementById('ustatVisitantes');
+    var ustatB  = document.getElementById('ustatBloqueados');
+    var ustatAd = document.getElementById('ustatAdmins');
+    if (ustatA)  ustatA.textContent  = alumnos;
+    if (ustatV)  ustatV.textContent  = visitantes;
+    if (ustatB)  ustatB.textContent  = bloqueados.length;
+    if (ustatAd) ustatAd.textContent = Math.max(admins, 1);
 
     renderizarTablaUsuarios(todosUsuarios);
 }
@@ -651,6 +674,23 @@ function obtenerTodosUsuarios() {
             rol: 'visitante',
             estado: bloqueados.indexOf(v.email||v.emailVisitante) !== -1 ? 'bloqueado' : 'activo' });
     });
+
+    // Administradores registrados
+    try {
+        var adminsArr = JSON.parse(localStorage.getItem('adminsRegistrados') || '[]');
+        adminsArr.forEach(function(a) {
+            lista.push({ id: a.id || ('adm-' + a.correo), nombre: a.nombre || '—',
+                tipo: 'admin', email: a.correo || '—', fecha: a.fecha || '',
+                rol: 'Administrador', estado: 'activo' });
+        });
+        // Incluir al admin actual si no está en el array
+        var correoAdmActual = sessionStorage.getItem('correoUsuario') || '';
+        var nombreAdmActual = sessionStorage.getItem('nombreUsuario') || localStorage.getItem('nombreUsuarioActual') || '';
+        if (nombreAdmActual && nombreAdmActual !== 'Administrador' && !lista.find(function(u){ return u.tipo==='admin' && u.email===correoAdmActual; })) {
+            lista.push({ id: 'adm-actual', nombre: nombreAdmActual, tipo: 'admin',
+                email: correoAdmActual || '—', fecha: '', rol: 'Administrador', estado: 'activo' });
+        }
+    } catch(e) {}
 
     // Fallback
     if (lista.length === 0) {
@@ -681,7 +721,7 @@ function renderizarTablaUsuarios(lista) {
 
     lista.forEach(function (u, i) {
         var tr = document.createElement('tr');
-        var bTipo   = u.tipo==='alumno' ? '<span class="task-badge badge-done">Alumno</span>' : '<span class="task-badge badge-pending">Visitante</span>';
+        var bTipo   = u.tipo==='alumno' ? '<span class="task-badge badge-done">Alumno</span>' : u.tipo==='admin' ? '<span class="task-badge" style="background:#ede9fe;color:#6d28d9;">Admin</span>' : '<span class="task-badge badge-pending">Visitante</span>';
         var bEstado = u.estado==='bloqueado'
             ? '<span class="task-badge badge-bloqueado">Bloqueado</span>'
             : '<span class="task-badge badge-activo">Activo</span>';
@@ -1038,6 +1078,9 @@ function exportarReporte() {
     fetch('/api/visits').then(r => r.json()).then(function(v) {
         visitas = v.total || 0;
         var hoy = v.hoy || 0;
+        // Guardar en localStorage como caché local
+        localStorage.setItem('contadorVisitas', String(visitas));
+        localStorage.setItem('contadorVisitasHoy', String(hoy));
         set('kpiVisitasTotales', visitas);
         set('kpiVisitasHoy', hoy);
         setText('resumVisitas', visitas > 0 ? visitas + ' visita(s)' : 'Sin visitas aún');
@@ -1046,7 +1089,11 @@ function exportarReporte() {
         setText2('statVisTotal', String(visitas));
         bit('bitMsgVisitas', visitas > 0 ? visitas + ' visita(s) acumuladas.' : 'Sin visitas aún.');
     }).catch(function() {
+        // Usar caché local si no hay servidor
         visitas = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
+        var hoyLocal = parseInt(localStorage.getItem('contadorVisitasHoy') || '0', 10);
+        set('kpiVisitasTotales', visitas);
+        set('kpiVisitasHoy', hoyLocal);
     });
     var menus       = JSON.parse(localStorage.getItem('menusCafeteria')    || '[]');
     var contactos   = JSON.parse(localStorage.getItem('contactosTECAdmin') || '[]');
@@ -1357,6 +1404,38 @@ function togglePerfilPermiso(correo, permitido) {
 // =============================================
 // PANEL NOTIFICACIONES
 // =============================================
+function verPerfilSolicitud(nombre, correo, numControl, carrera, fecha) {
+    var old = document.getElementById('_modalSolicitud');
+    if (old) old.remove();
+    var m = document.createElement('div');
+    m.id = '_modalSolicitud';
+    m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    m.innerHTML =
+        '<div style="background:#fff;border-radius:16px;padding:28px;max-width:400px;width:90%;position:relative;box-shadow:0 8px 32px rgba(0,0,0,.18);">' +
+            '<button onclick="document.getElementById(String.fromCharCode(95)+\'modalSolicitud\').remove()" ' +
+                'style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:#94a3b8;">✕</button>' +
+            '<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">' +
+                '<div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#3b5bdb,#1e3a8a);display:flex;align-items:center;justify-content:center;">' +
+                    '<i class="fas fa-user-graduate" style="color:#fff;font-size:1.4rem;"></i>' +
+                '</div>' +
+                '<div><div style="font-weight:700;font-size:1rem;color:#1e2a5a;">' + nombre + '</div>' +
+                '<span style="font-size:.75rem;color:#3b82f6;background:#eff6ff;padding:2px 8px;border-radius:20px;font-weight:600;">Nuevo Alumno</span></div>' +
+            '</div>' +
+            '<div style="display:flex;flex-direction:column;gap:8px;font-size:.88rem;color:#374151;">' +
+                '<div><i class="fas fa-envelope" style="width:18px;color:#6b7280;"></i> ' + correo + '</div>' +
+                '<div><i class="fas fa-id-card" style="width:18px;color:#6b7280;"></i> No. Control: ' + numControl + '</div>' +
+                '<div><i class="fas fa-graduation-cap" style="width:18px;color:#6b7280;"></i> ' + carrera + '</div>' +
+                '<div><i class="fas fa-calendar" style="width:18px;color:#6b7280;"></i> Registro: ' + fecha + '</div>' +
+            '</div>' +
+            '<div style="margin-top:16px;text-align:right;">' +
+                '<button onclick="document.getElementById(String.fromCharCode(95)+\'modalSolicitud\').remove()" ' +
+                    'style="padding:7px 18px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;cursor:pointer;">Cerrar</button>' +
+            '</div>' +
+        '</div>';
+    m.addEventListener('click', function(e){ if(e.target===m) m.remove(); });
+    document.body.appendChild(m);
+}
+
 function cargarPanelNotificaciones() {
     var alumnos    = JSON.parse(localStorage.getItem('alumnosRegistrados') || '[]');
     var visitantes = JSON.parse(localStorage.getItem('visitantesRegistrados') || '[]');
@@ -1375,19 +1454,26 @@ function cargarPanelNotificaciones() {
     // Solicitudes pendientes - alumnos recientes
     var solEl = document.getElementById('solicitudesPendientes');
     if (solEl) {
-        var recientes = alumnos.slice(-5).reverse(); // últimos 5
+        var leidasHasta2 = parseInt(localStorage.getItem('solicitudesLeidasHasta') || '0', 10);
+        var recientes = alumnos.slice(leidasHasta2).slice(-5).reverse(); // solo los no leídos, últimos 5
         if (recientes.length === 0) {
             solEl.innerHTML = '<p style="color:#888;font-size:.8rem;text-align:center;padding:12px 0;"><i class="fas fa-check-circle" style="color:#10b981;"></i> Sin solicitudes pendientes.</p>';
         } else {
             solEl.innerHTML = recientes.map(function(a) {
-                var fecha = a.fecha ? (function(f){ var d=new Date(f); return isNaN(d)?f:d.toLocaleDateString('es-MX'); })(a.fecha) : '—';
-                return '<div class="solicitud-item">' +
+                var fecha  = a.fecha ? (function(f){ var d=new Date(f); return isNaN(d)?f:d.toLocaleDateString('es-MX'); })(a.fecha) : '—';
+                var nombre = (a.nombreCompleto || a.nombre || '—').replace(/'/g, "\'");
+                var correo = (a.correo || '—').replace(/'/g, "\'");
+                var ctrl   = (a.numControl || '—').replace(/'/g, "\'");
+                var carr   = (a.carrera || '—').replace(/'/g, "\'");
+                return '<div class="solicitud-item" style="cursor:pointer;" ' +
+                    'onclick="verPerfilSolicitud(\'' + nombre + '\',\'' + correo + '\',\'' + ctrl + '\',\'' + carr + '\',\'' + fecha + '\')" ' +
+                    'title="Ver perfil del alumno">' +
                     '<i class="fas fa-user-circle" style="font-size:1.4rem;color:#3b82f6;"></i>' +
                     '<div class="sol-info">' +
                         '<div class="sol-nombre">' + (a.nombreCompleto || a.nombre || '—') + '</div>' +
                         '<div class="sol-fecha">' + (a.correo || '—') + ' · ' + fecha + '</div>' +
                     '</div>' +
-                    '<span class="sol-badge">Nuevo</span>' +
+                    '<span class="sol-badge" style="cursor:pointer;">Ver perfil ›</span>' +
                 '</div>';
             }).join('');
         }
@@ -1412,11 +1498,13 @@ function cargarPanelNotificaciones() {
         }
     }
 
-    // Actualizar badge en nav
-    var total = alumnos.length + reportes.length;
+    // Actualizar badge en nav — solo cuenta alumnos NUEVOS desde que se marcó leídas
+    var leidasHasta = parseInt(localStorage.getItem('solicitudesLeidasHasta') || '0', 10);
+    var nuevos = Math.max(0, alumnos.length - leidasHasta);
+    var totalBadge = nuevos + reportes.length;
     var badge = document.getElementById('snavNotifBadge');
     if (badge) {
-        if (total > 0) { badge.style.display = 'inline'; badge.textContent = total; }
+        if (totalBadge > 0) { badge.style.display = 'inline'; badge.textContent = totalBadge; }
         else { badge.style.display = 'none'; }
     }
 }
