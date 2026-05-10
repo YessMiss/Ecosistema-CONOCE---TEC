@@ -111,6 +111,15 @@ document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.notif-item.unread').forEach(function (el) { el.classList.remove('unread'); });
             var badge = document.getElementById('notifBadge');
             if (badge) badge.style.display = 'none';
+            // Marcar todas las solicitudes como leídas en localStorage
+            var alumnos = JSON.parse(localStorage.getItem('alumnosRegistrados') || '[]');
+            localStorage.setItem('solicitudesLeidasCount', alumnos.length);
+            // Limpiar badge del menú lateral
+            var snavBadge = document.getElementById('snavNotifBadge');
+            if (snavBadge) snavBadge.style.display = 'none';
+            // Limpiar sección solicitudesPendientes
+            var solEl = document.getElementById('solicitudesPendientes');
+            if (solEl) solEl.innerHTML = '<p style="color:#888;font-size:.8rem;text-align:center;padding:12px 0;"><i class="fas fa-check-circle" style="color:#10b981;"></i> Sin solicitudes pendientes.</p>';
         });
     }
 
@@ -620,12 +629,15 @@ function cargarTablaUsuarios() {
 
     var alumnos    = todosUsuarios.filter(function(u){ return u.tipo==='alumno'; }).length;
     var visitantes = todosUsuarios.filter(function(u){ return u.tipo==='visitante'; }).length;
+    var admins     = todosUsuarios.filter(function(u){ return u.tipo==='admin'; }).length;
     var ustatA = document.getElementById('ustatAlumnos');
     var ustatV = document.getElementById('ustatVisitantes');
     var ustatB = document.getElementById('ustatBloqueados');
-    if (ustatA) ustatA.textContent = alumnos;
-    if (ustatV) ustatV.textContent = visitantes;
-    if (ustatB) ustatB.textContent = bloqueados.length;
+    var ustatAd = document.getElementById('ustatAdmins');
+    if (ustatA)  ustatA.textContent  = alumnos;
+    if (ustatV)  ustatV.textContent  = visitantes;
+    if (ustatB)  ustatB.textContent  = bloqueados.length;
+    if (ustatAd) ustatAd.textContent = admins;
 
     renderizarTablaUsuarios(todosUsuarios);
 }
@@ -647,6 +659,26 @@ function obtenerTodosUsuarios() {
             rol: 'visitante',
             estado: bloqueados.indexOf(v.email||v.emailVisitante) !== -1 ? 'bloqueado' : 'activo' });
     });
+
+    // Administradores registrados
+    var adminData = JSON.parse(localStorage.getItem('adminData') ? '[' + localStorage.getItem('adminData') + ']' : '[]');
+    try {
+        var adminArr = JSON.parse(localStorage.getItem('adminsRegistrados') || '[]');
+        adminArr.forEach(function(a) {
+            lista.push({ id: a.id || Date.now()+2, nombre: a.nombre || a.nombreAdmin || '—',
+                tipo: 'admin', email: a.correo || a.email || '—', fecha: a.fecha || '',
+                rol: 'Administrador', estado: 'activo' });
+        });
+    } catch(e) {}
+    // Si no hay array, al menos mostrar el admin actual
+    if (!lista.find(function(u){ return u.tipo==='admin'; })) {
+        var nombreAdmin = sessionStorage.getItem('nombreUsuario') || localStorage.getItem('nombreUsuarioActual');
+        var correoAdmin = sessionStorage.getItem('correoUsuario') || localStorage.getItem('correoUsuarioActual');
+        if (nombreAdmin && nombreAdmin !== 'Administrador') {
+            lista.push({ id: 'admin-1', nombre: nombreAdmin, tipo: 'admin',
+                email: correoAdmin || '—', fecha: new Date().toISOString(), rol: 'Administrador', estado: 'activo' });
+        }
+    }
 
     // Fallback
     if (lista.length === 0) {
@@ -1353,6 +1385,37 @@ function togglePerfilPermiso(correo, permitido) {
 // =============================================
 // PANEL NOTIFICACIONES
 // =============================================
+function verPerfilSolicitud(alumno) {
+    // Mostrar modal con perfil del alumno
+    var existing = document.getElementById('modalPerfilSolicitud');
+    if (existing) existing.remove();
+
+    var modal = document.createElement('div');
+    modal.id = 'modalPerfilSolicitud';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    modal.innerHTML = '<div style="background:#fff;border-radius:16px;padding:32px;max-width:420px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.18);position:relative;">' +
+        '<button onclick="document.getElementById(\'modalPerfilSolicitud\').remove()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#94a3b8;">✕</button>' +
+        '<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">' +
+            '<div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#3b5bdb,#1e3a8a);display:flex;align-items:center;justify-content:center;">' +
+                '<i class="fas fa-user-graduate" style="color:#fff;font-size:1.6rem;"></i>' +
+            '</div>' +
+            '<div><h3 style="margin:0;font-size:1.1rem;color:#1e2a5a;">' + alumno.nombre + '</h3>' +
+            '<span style="font-size:.8rem;color:#3b82f6;background:#eff6ff;padding:2px 10px;border-radius:20px;font-weight:600;">Nuevo Alumno</span></div>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:10px;font-size:.9rem;color:#374151;">' +
+            '<div><i class="fas fa-envelope" style="width:20px;color:#6b7280;"></i> <strong>Correo:</strong> ' + alumno.correo + '</div>' +
+            '<div><i class="fas fa-id-card" style="width:20px;color:#6b7280;"></i> <strong>No. Control:</strong> ' + (alumno.numControl || '—') + '</div>' +
+            '<div><i class="fas fa-graduation-cap" style="width:20px;color:#6b7280;"></i> <strong>Carrera:</strong> ' + (alumno.carrera || '—') + '</div>' +
+            '<div><i class="fas fa-calendar" style="width:20px;color:#6b7280;"></i> <strong>Registro:</strong> ' + alumno.fecha + '</div>' +
+        '</div>' +
+        '<div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end;">' +
+            '<button onclick="document.getElementById(\'modalPerfilSolicitud\').remove()" style="padding:8px 20px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;cursor:pointer;color:#374151;">Cerrar</button>' +
+        '</div>' +
+    '</div>';
+    modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
+    document.body.appendChild(modal);
+}
+
 function cargarPanelNotificaciones() {
     var alumnos    = JSON.parse(localStorage.getItem('alumnosRegistrados') || '[]');
     var visitantes = JSON.parse(localStorage.getItem('visitantesRegistrados') || '[]');
@@ -1368,22 +1431,27 @@ function cargarPanelNotificaciones() {
     if (alertaMenusEl) alertaMenusEl.textContent = menus.length > 0 ? menus.length + ' menú(s) publicado(s) en cafetería.' : 'Sin menús publicados aún.';
     if (alertaVisEl)   alertaVisEl.textContent   = visitas > 0 ? visitas + ' visita(s) registrada(s) en total.' : 'Sin visitas registradas aún.';
 
-    // Solicitudes pendientes - alumnos recientes
+    // Solicitudes pendientes - solo alumnos NO leídos
     var solEl = document.getElementById('solicitudesPendientes');
     if (solEl) {
-        var recientes = alumnos.slice(-5).reverse(); // últimos 5
+        var leidasCount = parseInt(localStorage.getItem('solicitudesLeidasCount') || '0', 10);
+        var nuevos = alumnos.slice(leidasCount); // solo los nuevos desde la última vez que se marcaron
+        var recientes = nuevos.slice(-5).reverse(); // últimos 5
         if (recientes.length === 0) {
             solEl.innerHTML = '<p style="color:#888;font-size:.8rem;text-align:center;padding:12px 0;"><i class="fas fa-check-circle" style="color:#10b981;"></i> Sin solicitudes pendientes.</p>';
         } else {
-            solEl.innerHTML = recientes.map(function(a) {
+            solEl.innerHTML = recientes.map(function(a, idx) {
                 var fecha = a.fecha ? (function(f){ var d=new Date(f); return isNaN(d)?f:d.toLocaleDateString('es-MX'); })(a.fecha) : '—';
-                return '<div class="solicitud-item">' +
+                var correo = a.correo || '—';
+                var nombre = a.nombreCompleto || a.nombre || '—';
+                var dataIdx = JSON.parse(localStorage.getItem('alumnosRegistrados')||'[]').findIndex(function(x){ return (x.correo||x.email)===correo; });
+                return '<div class="solicitud-item" style="cursor:pointer;" onclick="verPerfilSolicitud(' + JSON.stringify({nombre:nombre,correo:correo,fecha:fecha,carrera:a.carrera||'—',numControl:a.numControl||'—'}) + ')" title="Ver perfil">' +
                     '<i class="fas fa-user-circle" style="font-size:1.4rem;color:#3b82f6;"></i>' +
                     '<div class="sol-info">' +
-                        '<div class="sol-nombre">' + (a.nombreCompleto || a.nombre || '—') + '</div>' +
-                        '<div class="sol-fecha">' + (a.correo || '—') + ' · ' + fecha + '</div>' +
+                        '<div class="sol-nombre">' + nombre + '</div>' +
+                        '<div class="sol-fecha">' + correo + ' · ' + fecha + '</div>' +
                     '</div>' +
-                    '<span class="sol-badge">Nuevo</span>' +
+                    '<span class="sol-badge" style="cursor:pointer;">Ver perfil</span>' +
                 '</div>';
             }).join('');
         }
@@ -1408,11 +1476,13 @@ function cargarPanelNotificaciones() {
         }
     }
 
-    // Actualizar badge en nav
-    var total = alumnos.length + reportes.length;
+    // Actualizar badge en nav (solo no leídas)
+    var leidasCountNav = parseInt(localStorage.getItem('solicitudesLeidasCount') || '0', 10);
+    var noLeidas = Math.max(0, alumnos.length - leidasCountNav);
+    var totalNav = noLeidas + reportes.length;
     var badge = document.getElementById('snavNotifBadge');
     if (badge) {
-        if (total > 0) { badge.style.display = 'inline'; badge.textContent = total; }
+        if (totalNav > 0) { badge.style.display = 'inline'; badge.textContent = totalNav; }
         else { badge.style.display = 'none'; }
     }
 }

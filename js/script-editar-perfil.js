@@ -153,9 +153,10 @@ function guardarCambios() {
     const pwNueva = document.getElementById('editContrasenaNueva') ? document.getElementById('editContrasenaNueva').value : '';
     const pwConfirmar = document.getElementById('editContrasenaConfirmar') ? document.getElementById('editContrasenaConfirmar').value : '';
 
-    if (pwNueva || pwConfirmar || pwActual) {
+    // Solo validar contraseña si el alumno escribió una contraseña nueva
+    if (pwNueva) {
         if (!pwActual) {
-            mostrarAlerta('Ingresa tu contraseña actual para cambiarla', 'warning');
+            mostrarAlerta('Ingresa tu contraseña actual para confirmar el cambio', 'warning');
             return;
         }
         if (pwNueva.length < 6) {
@@ -168,7 +169,6 @@ function guardarCambios() {
         }
         // Guardar nueva contraseña
         sessionStorage.setItem('contrasenaUsuario', pwNueva);
-        console.log('Contraseña actualizada');
     }
 
     // Guardar en sessionStorage
