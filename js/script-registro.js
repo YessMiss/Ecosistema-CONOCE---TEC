@@ -362,6 +362,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // Guardar siempre en localStorage para persistencia entre páginas
             localStorage.setItem('nombreUsuarioActual', nombre);
             localStorage.setItem('correoUsuarioActual', correo);
+            // Guardar datos académicos en localStorage para que persistan entre sesiones
+            localStorage.setItem('numControlActual', numCtrl);
+            // carrera y semestre se guardan cuando el alumno edite su perfil
+            // Si ya existen (editó antes), se conservan; si no, quedan vacíos para que los llene
+            if (!localStorage.getItem('carreraActual')) localStorage.setItem('carreraActual', '');
+            if (!localStorage.getItem('semestreActual')) localStorage.setItem('semestreActual', '');
 
             // Incrementar contador de personas registradas
             var registrados = parseInt(localStorage.getItem('contadorRegistrados') || '0', 10);

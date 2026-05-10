@@ -122,6 +122,16 @@
             <button class="sidebar-toggle" id="sidebarToggle" title="Mostrar/ocultar menú">
                 <i class="fas fa-bars"></i>
             </button>
+            <div class="header-logo" style="display:flex;align-items:center;gap:10px;margin-right:14px;">
+                <div class="logo-itm-wrap" style="display:flex;align-items:center;gap:8px;">
+                    <img src="../img/icono-alumno.png" alt="ITM" style="height:38px;width:38px;object-fit:contain;"
+                         onerror="this.style.display='none'">
+                    <div style="display:flex;flex-direction:column;line-height:1.1;">
+                        <span style="font-size:.65rem;font-weight:700;color:#fff;letter-spacing:.5px;">INSTITUTO TECNOLÓGICO</span>
+                        <span style="font-size:.65rem;font-weight:700;color:#fff;letter-spacing:.5px;">DE MINATITLÁN</span>
+                    </div>
+                </div>
+            </div>
             <div class="topbar-title" id="topbarTitle">
                 <h2>¡Bienvenido, <span id="adminWelcomeName">Administrador</span>!</h2>
                 <p>Aquí tienes un resumen general del sistema.</p>
@@ -201,6 +211,14 @@
                         <span class="kpi-label">Menús Publicados</span>
                         <span class="kpi-value" id="kpiMenus">0</span>
                         <span class="kpi-sub">En la cafetería</span>
+                    </div>
+                </div>
+                <div class="kpi-card kpi-green">
+                    <div class="kpi-icon"><i class="fas fa-utensils"></i></div>
+                    <div class="kpi-data">
+                        <span class="kpi-label">Visitas Cafetería</span>
+                        <span class="kpi-value" id="kpiVisitasCafeteria">0</span>
+                        <span class="kpi-sub">Hoy: <span id="kpiVisitasCafeteriaHoy">0</span></span>
                     </div>
                 </div>
                 <div class="kpi-card kpi-red">
@@ -527,7 +545,6 @@
                 <div class="users-stats-row">
                     <div class="ustat-card"><i class="fas fa-user-graduate"></i><span class="ustat-num" id="ustatAlumnos">0</span><span class="ustat-label">Alumnos</span></div>
                     <div class="ustat-card"><i class="fas fa-walking"></i><span class="ustat-num" id="ustatVisitantes">0</span><span class="ustat-label">Visitantes</span></div>
-                    <div class="ustat-card"><i class="fas fa-user-shield"></i><span class="ustat-num" id="ustatAdmins">0</span><span class="ustat-label">Administradores</span></div>
                     <div class="ustat-card"><i class="fas fa-user-shield"></i><span class="ustat-num">1</span><span class="ustat-label">Administradores</span></div>
                     <div class="ustat-card"><i class="fas fa-ban"></i><span class="ustat-num" id="ustatBloqueados">0</span><span class="ustat-label">Bloqueados</span></div>
                 </div>
@@ -540,7 +557,6 @@
                             <option value="">Todos los tipos</option>
                             <option value="alumno">Alumnos</option>
                             <option value="visitante">Visitantes</option>
-                            <option value="admin">Administradores</option>
                         </select>
                         <select class="users-filter" id="usersFilterStatus">
                             <option value="">Todos los estados</option>

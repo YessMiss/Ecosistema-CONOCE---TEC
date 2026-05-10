@@ -26,11 +26,13 @@ const ROOT         = __dirname;
 const REPORTS_FILE = path.join(ROOT, 'map', 'data', 'reports.json');
 const VISITS_FILE  = path.join(ROOT, 'data', 'visits.json');
 const USERS_FILE   = path.join(ROOT, 'data', 'users.json');
+const CAFETERIA_FILE = path.join(ROOT, 'data', 'cafeteria_visits.json');
 
 // En memoria (respaldo para Vercel)
 let reportsMemory = [];
 let visitsMemory  = { total: 0, hoy: 0, fecha: '' };
 let usersMemory   = { alumnos: [], admins: [], visitantes: 0 };
+let cafeteriaMemory = { total: 0, hoy: 0, fecha: '' };
 
 // ─────────────────────────────────────────────────────
 //  Middleware
@@ -62,6 +64,9 @@ if (!IS_VERCEL) {
 
   if (!fs.existsSync(USERS_FILE)) fs.writeFileSync(USERS_FILE, JSON.stringify(usersMemory, null, 2), 'utf-8');
   try { usersMemory = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8')); } catch { usersMemory = { alumnos: [], admins: [], visitantes: 0 }; }
+
+  if (!fs.existsSync(CAFETERIA_FILE)) fs.writeFileSync(CAFETERIA_FILE, JSON.stringify(cafeteriaMemory), 'utf-8');
+  try { cafeteriaMemory = JSON.parse(fs.readFileSync(CAFETERIA_FILE, 'utf-8')); } catch { cafeteriaMemory = { total: 0, hoy: 0, fecha: '' }; }
 }
 
 // ─────────────────────────────────────────────────────
@@ -174,6 +179,35 @@ app.delete('/api/users/:tipo/:correo', (req, res) => {
     if (tipo === 'alumno') u.alumnos = u.alumnos.filter(a => a.correo !== correo);
     if (tipo === 'admin')  u.admins  = u.admins.filter(a => a.correo !== correo);
     guardarUsuarios(u, () => res.json({ ok: true }));
+  });
+});
+
+// ─────────────────────────────────────────────────────
+//  API — Visitas a la sección Cafetería
+// ─────────────────────────────────────────────────────
+
+app.get('/api/cafeteria/visits', (req, res) => {
+  if (IS_VERCEL) return res.json(cafeteriaMemory);
+  fs.readFile(CAFETERIA_FILE, 'utf-8', (err, data) => {
+    try { res.json(JSON.parse(data)); } catch { res.json({ total: 0, hoy: 0, fecha: '' }); }
+  });
+});
+
+app.post('/api/cafeteria/visit', (req, res) => {
+  const hoy = new Date().toISOString().slice(0, 10);
+  if (IS_VERCEL) {
+    if (cafeteriaMemory.fecha !== hoy) { cafeteriaMemory.hoy = 0; cafeteriaMemory.fecha = hoy; }
+    cafeteriaMemory.total += 1;
+    cafeteriaMemory.hoy   += 1;
+    return res.json(cafeteriaMemory);
+  }
+  fs.readFile(CAFETERIA_FILE, 'utf-8', (err, data) => {
+    let v = { total: 0, hoy: 0, fecha: '' };
+    try { v = JSON.parse(data); } catch {}
+    if (v.fecha !== hoy) { v.hoy = 0; v.fecha = hoy; }
+    v.total += 1; v.hoy += 1;
+    cafeteriaMemory = v;
+    fs.writeFile(CAFETERIA_FILE, JSON.stringify(v, null, 2), 'utf-8', () => res.json(v));
   });
 });
 

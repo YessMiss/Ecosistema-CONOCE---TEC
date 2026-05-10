@@ -153,10 +153,9 @@ function guardarCambios() {
     const pwNueva = document.getElementById('editContrasenaNueva') ? document.getElementById('editContrasenaNueva').value : '';
     const pwConfirmar = document.getElementById('editContrasenaConfirmar') ? document.getElementById('editContrasenaConfirmar').value : '';
 
-    // Solo validar contraseña si el alumno escribió una contraseña nueva
-    if (pwNueva) {
+    if (pwNueva || pwConfirmar || pwActual) {
         if (!pwActual) {
-            mostrarAlerta('Ingresa tu contraseña actual para confirmar el cambio', 'warning');
+            mostrarAlerta('Ingresa tu contraseña actual para cambiarla', 'warning');
             return;
         }
         if (pwNueva.length < 6) {
@@ -169,6 +168,7 @@ function guardarCambios() {
         }
         // Guardar nueva contraseña
         sessionStorage.setItem('contrasenaUsuario', pwNueva);
+        console.log('Contraseña actualizada');
     }
 
     // Guardar en sessionStorage
@@ -183,9 +183,17 @@ function guardarCambios() {
     sessionStorage.setItem('direccionUsuario', direccion);
     sessionStorage.setItem('ciudadUsuario', ciudad);
 
-    // Persistir nombre y correo en localStorage para que sobrevivan entre páginas
+    // Persistir TODOS los datos en localStorage para que sobrevivan entre sesiones
     localStorage.setItem('nombreUsuarioActual', nombre);
+    localStorage.setItem('nombreCompletoActual', nombre);
     localStorage.setItem('correoUsuarioActual', correo);
+    if (matricula) localStorage.setItem('numControlActual', matricula);
+    localStorage.setItem('carreraActual', carrera);
+    localStorage.setItem('semestreActual', semestre);
+    localStorage.setItem('telefonoActual', telefono);
+    localStorage.setItem('telefonoEmergenciaActual', telefonoEmergencia);
+    localStorage.setItem('direccionActual', direccion);
+    localStorage.setItem('ciudadActual', ciudad);
 
     console.log('Cambios guardados:', { nombre, correo, carrera, semestre });
 

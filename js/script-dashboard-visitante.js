@@ -188,6 +188,13 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (sectionName === 'soporte') {
             sectionId = 'sectionSoporte';
         }
+
+        // Contar visita a cafetería
+        if (sectionName === 'cafeteria') {
+            var cafCount = parseInt(localStorage.getItem('visitasCafeteria') || '0', 10) + 1;
+            localStorage.setItem('visitasCafeteria', cafCount);
+            fetch('/api/cafeteria/visit', { method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}' }).catch(function(){});
+        }
         
         const sectionElement = document.getElementById(sectionId);
         if (sectionElement) {

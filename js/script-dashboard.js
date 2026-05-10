@@ -158,6 +158,10 @@ document.addEventListener('DOMContentLoaded', function() {
             sectionId = 'sectionDirectorio';
         } else if (sectionName === 'cafeteria') {
             sectionId = 'sectionCafeteria';
+            // Contar visita a cafetería
+            var cafCount = parseInt(localStorage.getItem('visitasCafeteria') || '0', 10) + 1;
+            localStorage.setItem('visitasCafeteria', cafCount);
+            fetch('/api/cafeteria/visit', { method: 'POST', headers: {'Content-Type':'application/json'}, body: '{}' }).catch(function(){});
         }
 
         const sectionElement = document.getElementById(sectionId);
