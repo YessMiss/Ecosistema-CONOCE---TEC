@@ -369,10 +369,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Guardar en lista de alumnos registrados (para notificaciones del admin)
             var alumnosArr = JSON.parse(localStorage.getItem('alumnosRegistrados') || '[]');
-            var fechaReg   = new Date().toLocaleString('es-MX', { dateStyle:'short', timeStyle:'short' });
+            var fechaReg   = new Date().toISOString();
             alumnosArr.push({ nombre: nombre, correo: correo, fecha: fechaReg, numControl: numCtrl });
             localStorage.setItem('alumnosRegistrados', JSON.stringify(alumnosArr));
             localStorage.setItem('ultimoUsuarioRegistrado', nombre);
+            // Guardar también en el servidor para que el admin lo vea
+            fetch('/api/users/alumno', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ nombre: nombre, correo: correo, fecha: fechaReg, numControl: numCtrl, carrera: carrera })
+            }).catch(function(e) { console.warn('No se pudo sincronizar con servidor:', e); });
 
             mostrarAlerta('¡Cuenta creada exitosamente! Bienvenido ' + nombre, 'success');
 

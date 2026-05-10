@@ -25,10 +25,12 @@ const IS_VERCEL    = !!process.env.VERCEL;
 const ROOT         = __dirname;
 const REPORTS_FILE = path.join(ROOT, 'map', 'data', 'reports.json');
 const VISITS_FILE  = path.join(ROOT, 'data', 'visits.json');
+const USERS_FILE   = path.join(ROOT, 'data', 'users.json');
 
 // En memoria (respaldo para Vercel)
 let reportsMemory = [];
 let visitsMemory  = { total: 0, hoy: 0, fecha: '' };
+let usersMemory   = { alumnos: [], admins: [], visitantes: 0 };
 
 // ─────────────────────────────────────────────────────
 //  Middleware
@@ -52,6 +54,9 @@ if (!IS_VERCEL) {
   if (!fs.existsSync(dataDir2)) fs.mkdirSync(dataDir2, { recursive: true });
   if (!fs.existsSync(VISITS_FILE)) fs.writeFileSync(VISITS_FILE, JSON.stringify(visitsMemory), 'utf-8');
   try { visitsMemory = JSON.parse(fs.readFileSync(VISITS_FILE, 'utf-8')); } catch { visitsMemory = { total: 0, hoy: 0, fecha: '' }; }
+
+  if (!fs.existsSync(USERS_FILE)) fs.writeFileSync(USERS_FILE, JSON.stringify(usersMemory, null, 2), 'utf-8');
+  try { usersMemory = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8')); } catch { usersMemory = { alumnos: [], admins: [], visitantes: 0 }; }
 }
 
 // ─────────────────────────────────────────────────────
@@ -100,6 +105,71 @@ app.delete('/api/reports', (req, res) => {
   } else {
     res.json({ ok: true });
   }
+});
+
+// ─────────────────────────────────────────────────────
+//  API — Usuarios (alumnos, admins, visitantes)
+// ─────────────────────────────────────────────────────
+
+function leerUsuarios(cb) {
+  if (IS_VERCEL) return cb(null, usersMemory);
+  fs.readFile(USERS_FILE, 'utf-8', (err, data) => {
+    try { cb(null, JSON.parse(data)); } catch { cb(null, { alumnos:[], admins:[], visitantes:0 }); }
+  });
+}
+function guardarUsuarios(u, cb) {
+  usersMemory = u;
+  if (IS_VERCEL) return cb && cb();
+  fs.writeFile(USERS_FILE, JSON.stringify(u, null, 2), 'utf-8', () => cb && cb());
+}
+
+// GET /api/users → obtener todos los usuarios
+app.get('/api/users', (req, res) => {
+  leerUsuarios((err, u) => res.json(u));
+});
+
+// POST /api/users/alumno → registrar alumno
+app.post('/api/users/alumno', (req, res) => {
+  const alumno = req.body;
+  if (!alumno || !alumno.nombre || !alumno.correo)
+    return res.status(400).json({ error: 'Faltan datos del alumno' });
+  alumno.fecha = new Date().toISOString();
+  leerUsuarios((err, u) => {
+    // Verificar si ya existe
+    if (u.alumnos.find(a => a.correo === alumno.correo))
+      return res.status(409).json({ error: 'Correo ya registrado' });
+    u.alumnos.push(alumno);
+    guardarUsuarios(u, () => res.status(201).json({ ok: true }));
+  });
+});
+
+// POST /api/users/admin → registrar admin
+app.post('/api/users/admin', (req, res) => {
+  const admin = req.body;
+  if (!admin || !admin.nombre) return res.status(400).json({ error: 'Faltan datos' });
+  admin.fecha = new Date().toISOString();
+  leerUsuarios((err, u) => {
+    u.admins.push(admin);
+    guardarUsuarios(u, () => res.status(201).json({ ok: true }));
+  });
+});
+
+// POST /api/users/visitante → contar visita de visitante
+app.post('/api/users/visitante', (req, res) => {
+  leerUsuarios((err, u) => {
+    u.visitantes = (u.visitantes || 0) + 1;
+    guardarUsuarios(u, () => res.json({ total: u.visitantes }));
+  });
+});
+
+// DELETE /api/users/:tipo/:correo → eliminar usuario
+app.delete('/api/users/:tipo/:correo', (req, res) => {
+  const { tipo, correo } = req.params;
+  leerUsuarios((err, u) => {
+    if (tipo === 'alumno') u.alumnos = u.alumnos.filter(a => a.correo !== correo);
+    if (tipo === 'admin')  u.admins  = u.admins.filter(a => a.correo !== correo);
+    guardarUsuarios(u, () => res.json({ ok: true }));
+  });
 });
 
 // ─────────────────────────────────────────────────────

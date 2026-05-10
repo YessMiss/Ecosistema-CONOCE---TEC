@@ -1635,13 +1635,16 @@ function cerrarModalInvestigacionEducativaV(event) {
     var visitaContada = sessionStorage.getItem('visitaContadaV');
     if (!visitaContada) {
         sessionStorage.setItem('visitaContadaV', 'true');
-        fetch('/api/visits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+        // Registrar visita en servidor (visible para el admin)
+        fetch('/api/users/visitante', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
           .then(r => r.json()).then(function(v) {
             localStorage.setItem('contadorVisitas', v.total);
           }).catch(function() {
             var visitas = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
             localStorage.setItem('contadorVisitas', visitas + 1);
           });
+        fetch('/api/visits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+          .catch(function() {});
     }
 
     function actualizarContadoresV() {

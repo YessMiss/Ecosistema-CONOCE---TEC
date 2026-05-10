@@ -227,7 +227,29 @@ function actualizarAvatars(src) {
 // KPIs REALES
 // =============================================
 function actualizarKPIs() {
-    // Leer visitas desde el servidor (contador global compartido)
+    // Cargar usuarios desde servidor y actualizar contadores
+    fetch('/api/users').then(r => r.json()).then(function(serverUsers) {
+        var alumnosServer = serverUsers.alumnos || [];
+        var adminsServer  = serverUsers.admins  || [];
+        var visServer     = serverUsers.visitantes || 0;
+        // Merge con localStorage para no perder datos locales
+        var alumnosLocal = JSON.parse(localStorage.getItem('alumnosRegistrados') || '[]');
+        alumnosLocal.forEach(function(la) {
+            if (!alumnosServer.find(function(sa) { return sa.correo === la.correo; })) {
+                alumnosServer.push(la);
+            }
+        });
+        // Actualizar KPIs con datos del servidor
+        var elAl = document.getElementById('kpiAlumnos');
+        var elVi = document.getElementById('kpiVisitantes');
+        var elAd = document.getElementById('kpiAdmins');
+        if (elAl) elAl.textContent = alumnosServer.length;
+        if (elVi) elVi.textContent = visServer;
+        if (elAd) elAd.textContent = adminsServer.length || 1;
+        // Actualizar localStorage con datos del servidor para otras funciones
+        localStorage.setItem('alumnosRegistrados', JSON.stringify(alumnosServer));
+    }).catch(function() { console.warn('Sin conexión al servidor, usando localStorage'); });
+
     var registrados = parseInt(localStorage.getItem('contadorRegistrados') || '0', 10);
     var visitas = 0;
     fetch('/api/visits').then(r => r.json()).then(function(v) {
@@ -458,7 +480,29 @@ function generarNotificaciones() {
     var notifBadge = document.getElementById('notifBadge');
     if (!notifList) return;
 
-    // Leer visitas desde el servidor (contador global compartido)
+    // Cargar usuarios desde servidor y actualizar contadores
+    fetch('/api/users').then(r => r.json()).then(function(serverUsers) {
+        var alumnosServer = serverUsers.alumnos || [];
+        var adminsServer  = serverUsers.admins  || [];
+        var visServer     = serverUsers.visitantes || 0;
+        // Merge con localStorage para no perder datos locales
+        var alumnosLocal = JSON.parse(localStorage.getItem('alumnosRegistrados') || '[]');
+        alumnosLocal.forEach(function(la) {
+            if (!alumnosServer.find(function(sa) { return sa.correo === la.correo; })) {
+                alumnosServer.push(la);
+            }
+        });
+        // Actualizar KPIs con datos del servidor
+        var elAl = document.getElementById('kpiAlumnos');
+        var elVi = document.getElementById('kpiVisitantes');
+        var elAd = document.getElementById('kpiAdmins');
+        if (elAl) elAl.textContent = alumnosServer.length;
+        if (elVi) elVi.textContent = visServer;
+        if (elAd) elAd.textContent = adminsServer.length || 1;
+        // Actualizar localStorage con datos del servidor para otras funciones
+        localStorage.setItem('alumnosRegistrados', JSON.stringify(alumnosServer));
+    }).catch(function() { console.warn('Sin conexión al servidor, usando localStorage'); });
+
     var registrados = parseInt(localStorage.getItem('contadorRegistrados') || '0', 10);
     var visitas = 0;
     fetch('/api/visits').then(r => r.json()).then(function(v) {
@@ -637,7 +681,7 @@ function renderizarTablaUsuarios(lista) {
         var bEstado = u.estado==='bloqueado'
             ? '<span class="task-badge badge-bloqueado">Bloqueado</span>'
             : '<span class="task-badge badge-activo">Activo</span>';
-        var fecha = u.fecha ? new Date(u.fecha).toLocaleDateString('es-MX') : '—';
+        var fecha = u.fecha ? (function(f){ var d=new Date(f); return isNaN(d)?f:d.toLocaleDateString('es-MX'); })(u.fecha) : '—';
         var btnBloquear = u.estado==='bloqueado'
             ? '<button class="tbl-btn" onclick="toggleBloquearUsuario(\'' + (u.email||u.id) + '\', false)"><i class="fas fa-unlock"></i></button>'
             : '<button class="tbl-btn tbl-btn-warn" onclick="toggleBloquearUsuario(\'' + (u.email||u.id) + '\', true)"><i class="fas fa-ban"></i></button>';
@@ -962,7 +1006,29 @@ function eliminarDir(idContacto) {
 // ESTADÍSTICAS — EXPORTAR REPORTE
 // =============================================
 function exportarReporte() {
-    // Leer visitas desde el servidor (contador global compartido)
+    // Cargar usuarios desde servidor y actualizar contadores
+    fetch('/api/users').then(r => r.json()).then(function(serverUsers) {
+        var alumnosServer = serverUsers.alumnos || [];
+        var adminsServer  = serverUsers.admins  || [];
+        var visServer     = serverUsers.visitantes || 0;
+        // Merge con localStorage para no perder datos locales
+        var alumnosLocal = JSON.parse(localStorage.getItem('alumnosRegistrados') || '[]');
+        alumnosLocal.forEach(function(la) {
+            if (!alumnosServer.find(function(sa) { return sa.correo === la.correo; })) {
+                alumnosServer.push(la);
+            }
+        });
+        // Actualizar KPIs con datos del servidor
+        var elAl = document.getElementById('kpiAlumnos');
+        var elVi = document.getElementById('kpiVisitantes');
+        var elAd = document.getElementById('kpiAdmins');
+        if (elAl) elAl.textContent = alumnosServer.length;
+        if (elVi) elVi.textContent = visServer;
+        if (elAd) elAd.textContent = adminsServer.length || 1;
+        // Actualizar localStorage con datos del servidor para otras funciones
+        localStorage.setItem('alumnosRegistrados', JSON.stringify(alumnosServer));
+    }).catch(function() { console.warn('Sin conexión al servidor, usando localStorage'); });
+
     var registrados = parseInt(localStorage.getItem('contadorRegistrados') || '0', 10);
     var visitas = 0;
     fetch('/api/visits').then(r => r.json()).then(function(v) {
@@ -1228,7 +1294,7 @@ function setPerfilPermitido(correo, permitido) {
             var bEstado = u.estado === 'bloqueado'
                 ? '<span class="task-badge badge-bloqueado">Bloqueado</span>'
                 : '<span class="task-badge badge-activo">Activo</span>';
-            var fecha = u.fecha ? new Date(u.fecha).toLocaleDateString('es-MX') : '—';
+            var fecha = u.fecha ? (function(f){ var d=new Date(f); return isNaN(d)?f:d.toLocaleDateString('es-MX'); })(u.fecha) : '—';
 
             var btnBloquear = u.estado === 'bloqueado'
                 ? '<button class="tbl-btn" onclick="toggleBloquearUsuario(\'' + (u.email || u.id) + '\', false)" title="Desbloquear"><i class="fas fa-unlock"></i></button>'
@@ -1310,7 +1376,7 @@ function cargarPanelNotificaciones() {
             solEl.innerHTML = '<p style="color:#888;font-size:.8rem;text-align:center;padding:12px 0;"><i class="fas fa-check-circle" style="color:#10b981;"></i> Sin solicitudes pendientes.</p>';
         } else {
             solEl.innerHTML = recientes.map(function(a) {
-                var fecha = a.fecha ? new Date(a.fecha).toLocaleDateString('es-MX') : '—';
+                var fecha = a.fecha ? (function(f){ var d=new Date(f); return isNaN(d)?f:d.toLocaleDateString('es-MX'); })(a.fecha) : '—';
                 return '<div class="solicitud-item">' +
                     '<i class="fas fa-user-circle" style="font-size:1.4rem;color:#3b82f6;"></i>' +
                     '<div class="sol-info">' +
