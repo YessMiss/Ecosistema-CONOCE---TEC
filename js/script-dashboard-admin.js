@@ -227,8 +227,22 @@ function actualizarAvatars(src) {
 // KPIs REALES
 // =============================================
 function actualizarKPIs() {
-    var visitas     = parseInt(localStorage.getItem('contadorVisitas')     || '0', 10);
+    // Leer visitas desde el servidor (contador global compartido)
     var registrados = parseInt(localStorage.getItem('contadorRegistrados') || '0', 10);
+    var visitas = 0;
+    fetch('/api/visits').then(r => r.json()).then(function(v) {
+        visitas = v.total || 0;
+        var hoy = v.hoy || 0;
+        set('kpiVisitasTotales', visitas);
+        set('kpiVisitasHoy', hoy);
+        setText('resumVisitas', visitas > 0 ? visitas + ' visita(s)' : 'Sin visitas aún');
+        act('actVisitas', visitas + ' visita(s) registrada(s) en total.');
+        set('statKpiVisitas', visitas);
+        setText2('statVisTotal', String(visitas));
+        bit('bitMsgVisitas', visitas > 0 ? visitas + ' visita(s) acumuladas.' : 'Sin visitas aún.');
+    }).catch(function() {
+        visitas = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
+    });
     var menus       = JSON.parse(localStorage.getItem('menusCafeteria')    || '[]');
     var contactos   = JSON.parse(localStorage.getItem('contactosTECAdmin') || '[]');
     var bloqueados  = JSON.parse(localStorage.getItem('usuariosBloqueados')|| '[]');
@@ -444,8 +458,22 @@ function generarNotificaciones() {
     var notifBadge = document.getElementById('notifBadge');
     if (!notifList) return;
 
-    var visitas     = parseInt(localStorage.getItem('contadorVisitas')     || '0', 10);
+    // Leer visitas desde el servidor (contador global compartido)
     var registrados = parseInt(localStorage.getItem('contadorRegistrados') || '0', 10);
+    var visitas = 0;
+    fetch('/api/visits').then(r => r.json()).then(function(v) {
+        visitas = v.total || 0;
+        var hoy = v.hoy || 0;
+        set('kpiVisitasTotales', visitas);
+        set('kpiVisitasHoy', hoy);
+        setText('resumVisitas', visitas > 0 ? visitas + ' visita(s)' : 'Sin visitas aún');
+        act('actVisitas', visitas + ' visita(s) registrada(s) en total.');
+        set('statKpiVisitas', visitas);
+        setText2('statVisTotal', String(visitas));
+        bit('bitMsgVisitas', visitas > 0 ? visitas + ' visita(s) acumuladas.' : 'Sin visitas aún.');
+    }).catch(function() {
+        visitas = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
+    });
     var errores     = JSON.parse(localStorage.getItem('reportesError')     || '[]');
     var notifs = [];
 
@@ -934,8 +962,22 @@ function eliminarDir(idContacto) {
 // ESTADÍSTICAS — EXPORTAR REPORTE
 // =============================================
 function exportarReporte() {
-    var visitas     = parseInt(localStorage.getItem('contadorVisitas')     || '0', 10);
+    // Leer visitas desde el servidor (contador global compartido)
     var registrados = parseInt(localStorage.getItem('contadorRegistrados') || '0', 10);
+    var visitas = 0;
+    fetch('/api/visits').then(r => r.json()).then(function(v) {
+        visitas = v.total || 0;
+        var hoy = v.hoy || 0;
+        set('kpiVisitasTotales', visitas);
+        set('kpiVisitasHoy', hoy);
+        setText('resumVisitas', visitas > 0 ? visitas + ' visita(s)' : 'Sin visitas aún');
+        act('actVisitas', visitas + ' visita(s) registrada(s) en total.');
+        set('statKpiVisitas', visitas);
+        setText2('statVisTotal', String(visitas));
+        bit('bitMsgVisitas', visitas > 0 ? visitas + ' visita(s) acumuladas.' : 'Sin visitas aún.');
+    }).catch(function() {
+        visitas = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
+    });
     var menus       = JSON.parse(localStorage.getItem('menusCafeteria')    || '[]');
     var contactos   = JSON.parse(localStorage.getItem('contactosTECAdmin') || '[]');
     var visitantes  = JSON.parse(localStorage.getItem('visitantesRegistrados') || '[]');

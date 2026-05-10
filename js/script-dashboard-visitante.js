@@ -1631,13 +1631,17 @@ function cerrarModalInvestigacionEducativaV(event) {
 // Comparte localStorage con el perfil Alumno
 // ========================================
 (function() {
-    // Incrementar visitas solo una vez por sesión de pestaña
+    // Incrementar visitas solo una vez por sesión de pestaña (contador global en servidor)
     var visitaContada = sessionStorage.getItem('visitaContadaV');
     if (!visitaContada) {
-        var visitas = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
-        visitas += 1;
-        localStorage.setItem('contadorVisitas', visitas);
         sessionStorage.setItem('visitaContadaV', 'true');
+        fetch('/api/visits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+          .then(r => r.json()).then(function(v) {
+            localStorage.setItem('contadorVisitas', v.total);
+          }).catch(function() {
+            var visitas = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
+            localStorage.setItem('contadorVisitas', visitas + 1);
+          });
     }
 
     function actualizarContadoresV() {

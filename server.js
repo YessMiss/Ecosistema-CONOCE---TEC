@@ -24,9 +24,11 @@ const PORT = process.env.PORT || 3000;
 const IS_VERCEL    = !!process.env.VERCEL;
 const ROOT         = __dirname;
 const REPORTS_FILE = path.join(ROOT, 'map', 'data', 'reports.json');
+const VISITS_FILE  = path.join(ROOT, 'data', 'visits.json');
 
-// Reportes en memoria (respaldo para Vercel)
+// En memoria (respaldo para Vercel)
 let reportsMemory = [];
+let visitsMemory  = { total: 0, hoy: 0, fecha: '' };
 
 // ─────────────────────────────────────────────────────
 //  Middleware
@@ -44,6 +46,12 @@ if (!IS_VERCEL) {
     fs.writeFileSync(REPORTS_FILE, '[]', 'utf-8');
   }
   try { reportsMemory = JSON.parse(fs.readFileSync(REPORTS_FILE, 'utf-8')); } catch { reportsMemory = []; }
+
+  // Inicializar visits.json
+  const dataDir2 = path.join(ROOT, 'data');
+  if (!fs.existsSync(dataDir2)) fs.mkdirSync(dataDir2, { recursive: true });
+  if (!fs.existsSync(VISITS_FILE)) fs.writeFileSync(VISITS_FILE, JSON.stringify(visitsMemory), 'utf-8');
+  try { visitsMemory = JSON.parse(fs.readFileSync(VISITS_FILE, 'utf-8')); } catch { visitsMemory = { total: 0, hoy: 0, fecha: '' }; }
 }
 
 // ─────────────────────────────────────────────────────
@@ -92,6 +100,46 @@ app.delete('/api/reports', (req, res) => {
   } else {
     res.json({ ok: true });
   }
+});
+
+// ─────────────────────────────────────────────────────
+//  API — Contador de visitas global
+// ─────────────────────────────────────────────────────
+
+function getHoy() { return new Date().toISOString().slice(0,10); }
+
+function leerVisitas(cb) {
+  if (IS_VERCEL) return cb(null, visitsMemory);
+  fs.readFile(VISITS_FILE, 'utf-8', (err, data) => {
+    if (err) return cb(null, { total: 0, hoy: 0, fecha: '' });
+    try { cb(null, JSON.parse(data)); } catch { cb(null, { total: 0, hoy: 0, fecha: '' }); }
+  });
+}
+
+function guardarVisitas(v, cb) {
+  visitsMemory = v;
+  if (IS_VERCEL) return cb && cb();
+  fs.writeFile(VISITS_FILE, JSON.stringify(v, null, 2), 'utf-8', () => cb && cb());
+}
+
+// GET /api/visits → obtener contadores actuales
+app.get('/api/visits', (req, res) => {
+  leerVisitas((err, v) => {
+    const hoy = getHoy();
+    if (v.fecha !== hoy) { v.hoy = 0; v.fecha = hoy; guardarVisitas(v); }
+    res.json(v);
+  });
+});
+
+// POST /api/visits → registrar una visita nueva
+app.post('/api/visits', (req, res) => {
+  leerVisitas((err, v) => {
+    const hoy = getHoy();
+    if (v.fecha !== hoy) { v.hoy = 0; v.fecha = hoy; }
+    v.total += 1;
+    v.hoy   += 1;
+    guardarVisitas(v, () => res.json(v));
+  });
 });
 
 // ─────────────────────────────────────────────────────
