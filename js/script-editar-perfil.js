@@ -1,34 +1,101 @@
 // ========================================
-// INICIALIZACIÓN Y VARIABLES GLOBALES
+// MUNICIPIOS POR ESTADO
 // ========================================
+var MUNICIPIOS = {
+    'Aguascalientes': ['Aguascalientes','Asientos','Calvillo','Cosío','El Llano','Jesús María','Pabellón de Arteaga','Rincón de Romos','San Francisco de los Romo','Tepezalá'],
+    'Baja California': ['Ensenada','Mexicali','Playas de Rosarito','Tecate','Tijuana'],
+    'Baja California Sur': ['Comondú','La Paz','Loreto','Los Cabos','Mulegé'],
+    'Campeche': ['Calkiní','Campeche','Carmen','Champotón','Escárcega','Hecelchakán','Hopelchén','Palizada','Tenabo','Calakmul','Candelaria'],
+    'Chiapas': ['Comitán de Domínguez','Ocosingo','San Cristóbal de las Casas','Tapachula','Tuxtla Gutiérrez','Tonalá','Palenque','Pichucalco'],
+    'Chihuahua': ['Chihuahua','Ciudad Juárez','Cuauhtémoc','Delicias','Hidalgo del Parral','Ojinaga'],
+    'Ciudad de México': ['Álvaro Obregón','Azcapotzalco','Benito Juárez','Coyoacán','Cuajimalpa','Cuauhtémoc','Gustavo A. Madero','Iztacalco','Iztapalapa','La Magdalena Contreras','Miguel Hidalgo','Milpa Alta','Tláhuac','Tlalpan','Venustiano Carranza','Xochimilco'],
+    'Coahuila': ['Monclova','Piedras Negras','Saltillo','Torreón','Acuña'],
+    'Colima': ['Colima','Comala','Coquimatlán','Cuauhtémoc','Ixtlahuacán','Manzanillo','Minatitlán','Técpan','Tecomán','Villa de Álvarez'],
+    'Durango': ['Durango','Gómez Palacio','Lerdo','Santiago Papasquiaro'],
+    'Estado de México': ['Ecatepec','Naucalpan','Nezahualcóyotl','Texcoco','Tlalnepantla','Toluca','Tultitlán','Chimalhuacán','Ixtapaluca'],
+    'Guanajuato': ['Celaya','Guanajuato','Irapuato','León','Salamanca','San Miguel de Allende','Silao'],
+    'Guerrero': ['Acapulco','Chilpancingo','Iguala','Taxco','Zihuatanejo'],
+    'Hidalgo': ['Pachuca','Tula de Allende','Tulancingo','Zimapán'],
+    'Jalisco': ['Guadalajara','Puerto Vallarta','Tlaquepaque','Tonalá','Zapopan','Tepatitlán','Lagos de Moreno'],
+    'Michoacán': ['Lázaro Cárdenas','Morelia','Uruapan','Zamora','Zitácuaro'],
+    'Morelos': ['Cuernavaca','Cuautla','Jiutepec','Temixco','Yautepec'],
+    'Nayarit': ['Bahía de Banderas','Compostela','Santiago Ixcuintla','Tepic'],
+    'Nuevo León': ['Apodaca','Escobedo','Guadalupe','Monterrey','San Nicolás de los Garza','San Pedro Garza García','Santa Catarina'],
+    'Oaxaca': ['Huajuapan de León','Juchitán','Oaxaca de Juárez','Salina Cruz','Tuxtepec'],
+    'Puebla': ['Puebla','San Andrés Cholula','San Martín Texmelucan','Tehuacán','Teziutlán'],
+    'Querétaro': ['Corregidora','El Marqués','Querétaro','San Juan del Río'],
+    'Quintana Roo': ['Benito Juárez (Cancún)','Cozumel','Felipe Carrillo Puerto','Isla Mujeres','Othón P. Blanco (Chetumal)','Playa del Carmen','Solidaridad','Tulum'],
+    'San Luis Potosí': ['Ciudad Valles','Matehuala','Rioverde','San Luis Potosí','Soledad de Graciano Sánchez'],
+    'Sinaloa': ['Ahome (Los Mochis)','Culiacán','Guasave','Mazatlán','Navolato'],
+    'Sonora': ['Cajeme (Cd. Obregón)','Guaymas','Hermosillo','Navojoa','Nogales'],
+    'Tabasco': ['Cárdenas','Centro (Villahermosa)','Comalcalco','Cunduacán','Macuspana','Paraíso'],
+    'Tamaulipas': ['Altamira','Madero','Matamoros','Nuevo Laredo','Reynosa','Tampico','Victoria'],
+    'Tlaxcala': ['Apizaco','Huamantla','Tlaxcala','Zacatelco'],
+    'Veracruz': ['Coatzacoalcos','Córdoba','Martínez de la Torre','Minatitlán','Orizaba','Papantla','Poza Rica','Tuxpan','Veracruz','Xalapa'],
+    'Yucatán': ['Kanasín','Mérida','Progreso','Umán','Valladolid'],
+    'Zacatecas': ['Fresnillo','Guadalupe','Jerez','Zacatecas']
+};
 
+// ========================================
+// INICIALIZACIÓN
+// ========================================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('CONOCE-TEC Editar Perfil - Página Cargada');
-    
-    // Cargar datos del usuario
     cargarDatosFormulario();
-    
-    // Configurar eventos
     configurarEventos();
+    configurarSelectEstadoCiudad();
 });
+
+// ========================================
+// SELECTS ESTADO / CIUDAD
+// ========================================
+function configurarSelectEstadoCiudad() {
+    var selEstado = document.getElementById('editEstado');
+    var selCiudad = document.getElementById('editCiudad');
+    if (!selEstado || !selCiudad) return;
+
+    selEstado.addEventListener('change', function() {
+        var estado = this.value;
+        selCiudad.innerHTML = '<option value="">Selecciona una ciudad</option>';
+        if (estado && MUNICIPIOS[estado]) {
+            MUNICIPIOS[estado].forEach(function(m) {
+                var opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = m;
+                selCiudad.appendChild(opt);
+            });
+        }
+    });
+}
+
+function poblarCiudadesPara(estado, ciudadActual) {
+    var selCiudad = document.getElementById('editCiudad');
+    if (!selCiudad) return;
+    selCiudad.innerHTML = '<option value="">Selecciona una ciudad</option>';
+    if (estado && MUNICIPIOS[estado]) {
+        MUNICIPIOS[estado].forEach(function(m) {
+            var opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = m;
+            if (m === ciudadActual) opt.selected = true;
+            selCiudad.appendChild(opt);
+        });
+    }
+}
 
 // ========================================
 // CARGAR DATOS DEL FORMULARIO
 // ========================================
-
 function cargarDatosFormulario() {
-    // Correo del alumno actual (identifica su perfil)
     var correoUsuario = sessionStorage.getItem('correoUsuario') ||
                         localStorage.getItem('correoUsuarioActual') ||
                         localStorage.getItem('correoAlumno') || '';
 
-    // Intentar cargar perfil guardado específico de este alumno
     var perfilGuardado = {};
     if (correoUsuario) {
         try { perfilGuardado = JSON.parse(localStorage.getItem('perfil_' + correoUsuario) || '{}'); } catch(e) {}
     }
 
-    // También buscar en alumnosRegistrados para recuperar numControl del registro
+    // Recuperar numControl del array alumnosRegistrados si no está en perfil
     var numControlRegistro = '';
     if (correoUsuario) {
         var alumnosArr = JSON.parse(localStorage.getItem('alumnosRegistrados') || '[]');
@@ -36,42 +103,38 @@ function cargarDatosFormulario() {
         if (alumnoReg) numControlRegistro = alumnoReg.numControl || alumnoReg.numeroControl || '';
     }
 
-    var nombreUsuario = perfilGuardado.nombre ||
-                        sessionStorage.getItem('usuarioActual') ||
-                        sessionStorage.getItem('nombreUsuario') ||
-                        localStorage.getItem('nombreUsuarioActual') || '';
+    var nombre    = perfilGuardado.nombre    || sessionStorage.getItem('usuarioActual')    || sessionStorage.getItem('nombreUsuario')   || localStorage.getItem('nombreUsuarioActual') || '';
+    var numControl= perfilGuardado.numControl|| sessionStorage.getItem('numeroControl')    || localStorage.getItem('numControlActual')  || localStorage.getItem('numControlGuardado') || numControlRegistro || '';
+    var carrera   = perfilGuardado.carrera   || sessionStorage.getItem('carreraUsuario')  || localStorage.getItem('carreraActual')     || localStorage.getItem('carreraGuardada')    || '';
+    var semestre  = perfilGuardado.semestre  || sessionStorage.getItem('semestreUsuario') || localStorage.getItem('semestreActual')    || localStorage.getItem('semestreGuardado')   || '';
+    var telefono  = perfilGuardado.telefono  || sessionStorage.getItem('telefonoUsuario') || '';
+    var telEm     = perfilGuardado.telEmergencia || sessionStorage.getItem('telefonoEmergencia') || '';
+    var direccion = perfilGuardado.direccion || sessionStorage.getItem('direccionUsuario') || '';
+    var estado    = perfilGuardado.estado    || sessionStorage.getItem('estadoUsuario')   || '';
+    var ciudad    = perfilGuardado.ciudad    || sessionStorage.getItem('ciudadUsuario')   || '';
 
-    var numControl = perfilGuardado.numControl ||
-                     sessionStorage.getItem('numeroControl') ||
-                     localStorage.getItem('numControlActual') ||
-                     localStorage.getItem('numControlGuardado') ||
-                     numControlRegistro || '';
+    document.getElementById('editNombre').value             = nombre;
+    document.getElementById('editCorreo').value             = correoUsuario;
+    document.getElementById('editMatricula').value          = numControl;
+    document.getElementById('editCarrera').value            = carrera;
+    document.getElementById('editSemestre').value           = semestre;
+    document.getElementById('editTelefono').value           = telefono;
+    document.getElementById('editTelefonoEmergencia').value = telEm;
+    document.getElementById('editDireccion').value          = direccion;
 
-    var carrera  = perfilGuardado.carrera  || sessionStorage.getItem('carreraUsuario')  || localStorage.getItem('carreraActual')  || localStorage.getItem('carreraGuardada')  || '';
-    var semestre = perfilGuardado.semestre || sessionStorage.getItem('semestreUsuario') || localStorage.getItem('semestreActual') || localStorage.getItem('semestreGuardado') || '';
-    var telefono       = perfilGuardado.telefono       || sessionStorage.getItem('telefonoUsuario')    || '';
-    var telEmergencia  = perfilGuardado.telEmergencia  || sessionStorage.getItem('telefonoEmergencia') || '';
-    var direccion      = perfilGuardado.direccion      || sessionStorage.getItem('direccionUsuario')   || '';
-    var ciudad         = perfilGuardado.ciudad         || sessionStorage.getItem('ciudadUsuario')      || '';
-
-    document.getElementById('editNombre').value              = nombreUsuario;
-    document.getElementById('editCorreo').value              = correoUsuario;
-    document.getElementById('editMatricula').value           = numControl;
-    document.getElementById('editCarrera').value             = carrera;
-    document.getElementById('editSemestre').value            = semestre;
-    document.getElementById('editTelefono').value            = telefono;
-    document.getElementById('editTelefonoEmergencia').value  = telEmergencia;
-    document.getElementById('editDireccion').value           = direccion;
-    document.getElementById('editCiudad').value              = ciudad;
+    // Cargar estado y poblar ciudades
+    var selEstado = document.getElementById('editEstado');
+    if (selEstado && estado) {
+        selEstado.value = estado;
+        poblarCiudadesPara(estado, ciudad);
+    }
 }
 
 // ========================================
 // CONFIGURAR EVENTOS
 // ========================================
-
 function configurarEventos() {
-    // Evento para enviar el formulario
-    const formEditarPerfil = document.getElementById('formEditarPerfil');
+    var formEditarPerfil = document.getElementById('formEditarPerfil');
     if (formEditarPerfil) {
         formEditarPerfil.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -79,184 +142,79 @@ function configurarEventos() {
         });
     }
 
-    // Botón Cerrar Sesión
-    const btnLogout = document.getElementById('btnLogout');
-    if (btnLogout) {
-        btnLogout.addEventListener('click', cerrarSesion);
-    }
-
-    // Botones mostrar/ocultar contraseña
-    document.querySelectorAll('.btn-toggle-pw').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            const targetId = this.getAttribute('data-target');
-            const input = document.getElementById(targetId);
-            const icon = this.querySelector('i');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.replace('fa-eye', 'fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.replace('fa-eye-slash', 'fa-eye');
-            }
-        });
-    });
-
-    // Validar coincidencia de contraseñas en tiempo real
-    const pwNueva = document.getElementById('editContrasenaNueva');
-    const pwConfirmar = document.getElementById('editContrasenaConfirmar');
-    const pwMatchMsg = document.getElementById('pwMatchMsg');
-    const pwStrengthMsg = document.getElementById('pwStrengthMsg');
-
-    if (pwNueva) {
-        pwNueva.addEventListener('input', function() {
-            const val = this.value;
-            if (val.length === 0) {
-                pwStrengthMsg.textContent = '';
-            } else if (val.length < 6) {
-                pwStrengthMsg.textContent = 'Contraseña muy corta (mínimo 6 caracteres)';
-                pwStrengthMsg.style.color = '#ef4444';
-            } else if (val.length < 12) {
-                pwStrengthMsg.textContent = 'Contraseña débil';
-                pwStrengthMsg.style.color = '#f97316';
-            } else {
-                pwStrengthMsg.textContent = 'Contraseña fuerte ✓';
-                pwStrengthMsg.style.color = '#10b981';
-            }
-            if (pwConfirmar && pwConfirmar.value) validarCoincidencia();
-        });
-    }
-
-    if (pwConfirmar) {
-        pwConfirmar.addEventListener('input', validarCoincidencia);
-    }
-
-    function validarCoincidencia() {
-        if (!pwNueva || !pwConfirmar || !pwMatchMsg) return;
-        if (pwConfirmar.value === '') {
-            pwMatchMsg.textContent = '';
-            return;
-        }
-        if (pwNueva.value === pwConfirmar.value) {
-            pwMatchMsg.textContent = 'Las contraseñas coinciden ✓';
-            pwMatchMsg.className = 'form-text ok';
-        } else {
-            pwMatchMsg.textContent = 'Las contraseñas no coinciden';
-            pwMatchMsg.className = 'form-text error';
-        }
-    }
+    var btnLogout = document.getElementById('btnLogout');
+    if (btnLogout) btnLogout.addEventListener('click', cerrarSesion);
 }
 
 // ========================================
-// GUARDAR CAMBIOS
+// GUARDAR CAMBIOS — sin bloqueo de contraseña
 // ========================================
-
 function guardarCambios() {
-    var nombre            = document.getElementById('editNombre').value.trim();
-    var correo            = document.getElementById('editCorreo').value.trim();
-    var telefono          = document.getElementById('editTelefono').value.trim();
-    var matricula         = document.getElementById('editMatricula').value.trim();
-    var carrera           = document.getElementById('editCarrera').value;
-    var semestre          = document.getElementById('editSemestre').value;
-    var telefonoEmergencia= document.getElementById('editTelefonoEmergencia').value.trim();
-    var direccion         = document.getElementById('editDireccion').value.trim();
-    var ciudad            = document.getElementById('editCiudad').value.trim();
+    var nombre    = document.getElementById('editNombre').value.trim();
+    var correo    = document.getElementById('editCorreo').value.trim();
+    var telefono  = document.getElementById('editTelefono').value.trim();
+    var matricula = document.getElementById('editMatricula').value.trim();
+    var carrera   = document.getElementById('editCarrera').value;
+    var semestre  = document.getElementById('editSemestre').value;
+    var telEm     = document.getElementById('editTelefonoEmergencia').value.trim();
+    var direccion = document.getElementById('editDireccion').value.trim();
+    var estado    = document.getElementById('editEstado')  ? document.getElementById('editEstado').value  : '';
+    var ciudad    = document.getElementById('editCiudad')  ? document.getElementById('editCiudad').value  : '';
 
-    // Validar campos requeridos
     if (!nombre || !correo) {
-        mostrarAlerta('Por favor completa los campos requeridos', 'warning');
+        mostrarAlerta('Por favor completa los campos requeridos (nombre y correo)', 'warning');
         return;
     }
-
     if (!validarCorreo(correo)) {
         mostrarAlerta('Por favor ingresa un correo válido', 'warning');
         return;
     }
 
-    // Cambio de contraseña: SOLO si el alumno llenó algún campo de contraseña
-    var pwActual    = document.getElementById('editContrasenaActual')    ? document.getElementById('editContrasenaActual').value    : '';
-    var pwNueva     = document.getElementById('editContrasenaNueva')     ? document.getElementById('editContrasenaNueva').value     : '';
-    var pwConfirmar = document.getElementById('editContrasenaConfirmar') ? document.getElementById('editContrasenaConfirmar').value : '';
-
-    if (pwNueva || pwConfirmar || pwActual) {
-        // Solo entonces validamos la contraseña
-        if (!pwActual) {
-            mostrarAlerta('Ingresa tu contraseña actual para cambiarla', 'warning');
-            return;
-        }
-        if (pwNueva.length < 6) {
-            mostrarAlerta('La nueva contraseña debe tener al menos 6 caracteres', 'warning');
-            return;
-        }
-        if (pwNueva !== pwConfirmar) {
-            mostrarAlerta('Las contraseñas nuevas no coinciden', 'warning');
-            return;
-        }
-        // Guardar nueva contraseña en el perfil del alumno
-        localStorage.setItem('contrasena_' + correo, pwNueva);
-        sessionStorage.setItem('contrasenaUsuario', pwNueva);
-    }
-
-    // ── Guardar perfil con clave por correo (persiste entre sesiones) ──────
+    // Guardar perfil con clave por correo (persiste entre sesiones)
     var perfilData = {
-        nombre:         nombre,
-        correo:         correo,
-        numControl:     matricula,
-        carrera:        carrera,
-        semestre:       semestre,
-        telefono:       telefono,
-        telEmergencia:  telefonoEmergencia,
-        direccion:      direccion,
-        ciudad:         ciudad
+        nombre: nombre, correo: correo, numControl: matricula,
+        carrera: carrera, semestre: semestre, telefono: telefono,
+        telEmergencia: telEm, direccion: direccion, estado: estado, ciudad: ciudad
     };
     localStorage.setItem('perfil_' + correo, JSON.stringify(perfilData));
 
-    // ── También actualizar claves genéricas para compatibilidad ────────────
+    // Claves genéricas de compatibilidad
     localStorage.setItem('nombreUsuarioActual',  nombre);
     localStorage.setItem('correoUsuarioActual',  correo);
-    if (matricula) {
-        localStorage.setItem('numControlActual',   matricula);
-        localStorage.setItem('numControlGuardado', matricula);
-    }
-    localStorage.setItem('carreraActual',    carrera);
-    localStorage.setItem('carreraGuardada',  carrera);
-    localStorage.setItem('semestreActual',   semestre);
-    localStorage.setItem('semestreGuardado', semestre);
+    if (matricula) { localStorage.setItem('numControlActual', matricula); localStorage.setItem('numControlGuardado', matricula); }
+    localStorage.setItem('carreraActual',    carrera);  localStorage.setItem('carreraGuardada',  carrera);
+    localStorage.setItem('semestreActual',   semestre); localStorage.setItem('semestreGuardado', semestre);
 
-    // ── Actualizar sessionStorage para la sesión actual ────────────────────
-    sessionStorage.setItem('usuarioActual',       nombre);
-    sessionStorage.setItem('nombreUsuario',       nombre);
-    sessionStorage.setItem('correoUsuario',       correo);
-    sessionStorage.setItem('telefonoUsuario',     telefono);
+    // sessionStorage para la sesión actual
+    sessionStorage.setItem('usuarioActual',      nombre);
+    sessionStorage.setItem('nombreUsuario',      nombre);
+    sessionStorage.setItem('correoUsuario',      correo);
+    sessionStorage.setItem('telefonoUsuario',    telefono);
     if (matricula) sessionStorage.setItem('numeroControl', matricula);
-    sessionStorage.setItem('carreraUsuario',      carrera);
-    sessionStorage.setItem('semestreUsuario',     semestre);
-    sessionStorage.setItem('telefonoEmergencia',  telefonoEmergencia);
-    sessionStorage.setItem('direccionUsuario',    direccion);
-    sessionStorage.setItem('ciudadUsuario',       ciudad);
+    sessionStorage.setItem('carreraUsuario',     carrera);
+    sessionStorage.setItem('semestreUsuario',    semestre);
+    sessionStorage.setItem('telefonoEmergencia', telEm);
+    sessionStorage.setItem('direccionUsuario',   direccion);
+    sessionStorage.setItem('estadoUsuario',      estado);
+    sessionStorage.setItem('ciudadUsuario',      ciudad);
 
-    // ── Actualizar también en el array alumnosRegistrados ──────────────────
+    // Actualizar en alumnosRegistrados
     var alumnosArr = JSON.parse(localStorage.getItem('alumnosRegistrados') || '[]');
     var idx = alumnosArr.findIndex(function(a) { return (a.correo || a.email) === correo; });
     if (idx !== -1) {
-        alumnosArr[idx].nombreCompleto = nombre;
-        alumnosArr[idx].nombre        = nombre;
-        alumnosArr[idx].numControl    = matricula;
-        alumnosArr[idx].carrera       = carrera;
-        alumnosArr[idx].semestre      = semestre;
+        alumnosArr[idx].nombreCompleto = nombre; alumnosArr[idx].nombre = nombre;
+        alumnosArr[idx].numControl = matricula; alumnosArr[idx].carrera = carrera;
+        alumnosArr[idx].semestre   = semestre;
         localStorage.setItem('alumnosRegistrados', JSON.stringify(alumnosArr));
     }
 
     mostrarAlerta('¡Perfil actualizado correctamente!', 'success');
-
-    setTimeout(function() {
-        window.location.href = 'perfil-alumno.html';
-    }, 1500);
+    setTimeout(function() { window.location.href = 'perfil-alumno.html'; }, 1500);
 }
 
 // ========================================
 // CERRAR SESIÓN
 // ========================================
-
 function cerrarSesion() {
     if (confirm('¿Deseas cerrar sesión?')) {
         sessionStorage.clear();
@@ -268,46 +226,17 @@ function cerrarSesion() {
 // ========================================
 // FUNCIONES AUXILIARES
 // ========================================
-
 function validarCorreo(correo) {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(correo);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
 }
 
-function mostrarAlerta(mensaje, tipo = 'info') {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${tipo} alert-dismissible fade show`;
+function mostrarAlerta(mensaje, tipo) {
+    tipo = tipo || 'info';
+    var alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-' + tipo + ' alert-dismissible fade show';
     alertDiv.setAttribute('role', 'alert');
-    alertDiv.innerHTML = `
-        ${mensaje}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    `;
-
-    document.body.insertBefore(alertDiv, document.body.firstChild);
-
-    alertDiv.style.position = 'fixed';
-    alertDiv.style.top = '20px';
-    alertDiv.style.right = '20px';
-    alertDiv.style.zIndex = '9999';
-    alertDiv.style.maxWidth = '400px';
-    alertDiv.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-
-    setTimeout(function() {
-        alertDiv.remove();
-    }, 5000);
+    alertDiv.innerHTML = mensaje + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+    alertDiv.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;max-width:400px;box-shadow:0 4px 12px rgba(0,0,0,0.15);';
+    document.body.appendChild(alertDiv);
+    setTimeout(function() { alertDiv.remove(); }, 5000);
 }
-
-// ========================================
-// FUNCIONES DE DEPURACIÓN
-// ========================================
-
-window.verDatosEdicion = function() {
-    console.log('=== DATOS DE EDICIÓN ===');
-    console.log('Nombre:', document.getElementById('editNombre').value);
-    console.log('Correo:', document.getElementById('editCorreo').value);
-    console.log('Carrera:', document.getElementById('editCarrera').value);
-    console.log('Semestre:', document.getElementById('editSemestre').value);
-    console.log('=======================');
-};
-
-console.log('Escribe verDatosEdicion() para ver los datos');

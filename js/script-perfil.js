@@ -89,7 +89,10 @@ function cargarDatosUsuario() {
     var telefono      = perfilGuardado.telefono      || sessionStorage.getItem('telefonoUsuario')    || '';
     var telEmergencia = perfilGuardado.telEmergencia || sessionStorage.getItem('telefonoEmergencia') || '';
     var direccion     = perfilGuardado.direccion     || sessionStorage.getItem('direccionUsuario')   || '';
+    var estado        = perfilGuardado.estado        || sessionStorage.getItem('estadoUsuario')      || '';
     var ciudad        = perfilGuardado.ciudad        || sessionStorage.getItem('ciudadUsuario')      || '';
+    // Mostrar "Estado, Ciudad" o solo uno si el otro falta
+    var ciudadDisplay = (estado && ciudad) ? (ciudad + ', ' + estado) : (ciudad || estado || '');
 
     // Si encontramos datos en el perfil guardado, sincronizamos sessionStorage
     // para que la sesión actual los tenga disponibles
@@ -103,6 +106,7 @@ function cargarDatosUsuario() {
         if (telefono)       sessionStorage.setItem('telefonoUsuario',     telefono);
         if (telEmergencia)  sessionStorage.setItem('telefonoEmergencia',  telEmergencia);
         if (direccion)      sessionStorage.setItem('direccionUsuario',    direccion);
+        if (estado)         sessionStorage.setItem('estadoUsuario',       estado);
         if (ciudad)         sessionStorage.setItem('ciudadUsuario',       ciudad);
     }
 
@@ -117,7 +121,7 @@ function cargarDatosUsuario() {
     setText('infoTelefonoCelular',    telefono);
     setText('infoTelefonoEmergencia', telEmergencia);
     setText('infoDireccion', direccion);
-    setText('infoCiudad',    ciudad);
+    setText('infoCiudad',    ciudadDisplay);
 }
 
 function setText(id, val) {

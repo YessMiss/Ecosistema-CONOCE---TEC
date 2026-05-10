@@ -1679,67 +1679,46 @@ function cargarTablaAdmins() {
 
 
 // =============================================
-// SINCRONIZACIÓN DE VISITAS — MEJORADA
+// SINCRONIZACIÓN DE VISITAS (solo lectura — las registran alumno y visitante)
 // =============================================
 (function() {
-    // Registrar visita del admin al cargar
-    function registrarVisitaAdmin() {
-        var hoy = new Date().toDateString();
-        var ultimoDia = localStorage.getItem('ultimoDiaVisita');
-        if (ultimoDia !== hoy) {
-            localStorage.setItem('contadorVisitasHoy', '0');
-            localStorage.setItem('ultimoDiaVisita', hoy);
-        }
-        // Incrementar visitas totales
-        var total = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
-        localStorage.setItem('contadorVisitas', total + 1);
-        // Incrementar visitas hoy
-        var hoyCount = parseInt(localStorage.getItem('contadorVisitasHoy') || '0', 10);
-        localStorage.setItem('contadorVisitasHoy', hoyCount + 1);
-        // Historial diario (para la gráfica)
-        var dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-        var diaNombre = dias[new Date().getDay()];
-        var historial = JSON.parse(localStorage.getItem('historialVisitasDiarias') || '{}');
-        historial[diaNombre] = (parseInt(historial[diaNombre] || '0', 10) + 1);
-        localStorage.setItem('historialVisitasDiarias', JSON.stringify(historial));
-    }
-
-    // Sincronizar también con el servidor cuando esté disponible
+    // El admin NO incrementa el contador de visitas.
+    // Solo lee lo que alumno y visitante registraron.
     function sincronizarVisitasConServidor() {
         fetch('/api/visits').then(function(r) { return r.json(); }).then(function(v) {
             var totalServidor = v.total || 0;
-            var hoyServidor   = v.hoy || 0;
-            // Usar el máximo entre servidor y localStorage (evita perder datos)
-            var totalLocal = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
+            var hoyServidor   = v.hoy   || 0;
+            var totalLocal = parseInt(localStorage.getItem('contadorVisitas')    || '0', 10);
             var hoyLocal   = parseInt(localStorage.getItem('contadorVisitasHoy') || '0', 10);
             var totalFinal = Math.max(totalServidor, totalLocal);
-            var hoyFinal   = Math.max(hoyServidor, hoyLocal);
-            // Actualizar KPIs en pantalla
-            var elTotal = document.getElementById('kpiVisitasTotales');
-            var elHoy   = document.getElementById('kpiVisitasHoy');
-            var elStat  = document.getElementById('statKpiVisitas');
-            if (elTotal) elTotal.textContent = totalFinal > 0 ? totalFinal.toLocaleString('es-MX') : '0';
-            if (elHoy)   elHoy.textContent   = hoyFinal   > 0 ? hoyFinal.toLocaleString('es-MX')   : '0';
-            if (elStat)  elStat.textContent  = totalFinal > 0 ? totalFinal.toLocaleString('es-MX') : '0';
-            var elResum = document.getElementById('resumVisitas');
-            if (elResum) elResum.textContent = totalFinal > 0 ? totalFinal + ' visita(s)' : 'Sin visitas aún';
-            var elAct = document.getElementById('actVisitas');
-            if (elAct) elAct.textContent = totalFinal + ' visita(s) registrada(s) en total.';
+            var hoyFinal   = Math.max(hoyServidor,  hoyLocal);
+            actualizarKPIsVisitas(totalFinal, hoyFinal);
         }).catch(function() {
-            // Sin servidor: usar localStorage
-            var total = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
+            var total = parseInt(localStorage.getItem('contadorVisitas')    || '0', 10);
             var hoy   = parseInt(localStorage.getItem('contadorVisitasHoy') || '0', 10);
-            var elTotal = document.getElementById('kpiVisitasTotales');
-            var elHoy   = document.getElementById('kpiVisitasHoy');
-            if (elTotal) elTotal.textContent = total > 0 ? total.toLocaleString('es-MX') : '0';
-            if (elHoy)   elHoy.textContent   = hoy   > 0 ? hoy.toLocaleString('es-MX')   : '0';
+            actualizarKPIsVisitas(total, hoy);
         });
     }
 
+    function actualizarKPIsVisitas(total, hoy) {
+        var fmt = function(n) { return n > 0 ? n.toLocaleString('es-MX') : '0'; };
+        var set = function(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+        set('kpiVisitasTotales', fmt(total));
+        set('kpiVisitasHoy',     fmt(hoy));
+        set('statKpiVisitas',    fmt(total));
+        set('resumVisitas',      total > 0 ? total + ' visita(s)' : 'Sin visitas aún');
+        set('actVisitas',        total + ' visita(s) registrada(s) en total.');
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-        registrarVisitaAdmin();
         sincronizarVisitasConServidor();
-        // Re-sincronizar cada 30 segundos
         setInterval(sincronizarVisitasConServidor, 30000);
+    });
+
+    // Actualizar inmediatamente si otro tab (alumno/visitante) cambia el contador
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'contadorVisitas' || e.key === 'contadorVisitasHoy') {
+            sincronizarVisitasConServidor();
+        }
     });
 })();

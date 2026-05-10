@@ -991,6 +991,22 @@ document.addEventListener('DOMContentLoaded', function() {
         visitas += 1;
         localStorage.setItem('contadorVisitas', visitas);
         sessionStorage.setItem('visitaContada', 'true');
+
+        // Visitas hoy
+        var hoy = new Date().toDateString();
+        if (localStorage.getItem('ultimoDiaVisita') !== hoy) {
+            localStorage.setItem('contadorVisitasHoy', '0');
+            localStorage.setItem('ultimoDiaVisita', hoy);
+        }
+        var hoyCount = parseInt(localStorage.getItem('contadorVisitasHoy') || '0', 10);
+        localStorage.setItem('contadorVisitasHoy', hoyCount + 1);
+
+        // Historial diario para la gráfica del admin
+        var dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+        var diaNombre = dias[new Date().getDay()];
+        var historial = JSON.parse(localStorage.getItem('historialVisitasDiarias') || '{}');
+        historial[diaNombre] = (parseInt(historial[diaNombre] || '0', 10) + 1);
+        localStorage.setItem('historialVisitasDiarias', JSON.stringify(historial));
     }
 
     function actualizarContadores() {

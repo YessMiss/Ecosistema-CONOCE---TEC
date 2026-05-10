@@ -136,49 +136,49 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="editCiudad" class="form-label">Ciudad</label>
-                            <input type="text" class="form-control" id="editCiudad" placeholder="Ingresa tu ciudad">
+                            <label for="editEstado" class="form-label">Estado</label>
+                            <select class="form-control" id="editEstado">
+                                <option value="">Selecciona un estado</option>
+                                <option value="Aguascalientes">Aguascalientes</option>
+                                <option value="Baja California">Baja California</option>
+                                <option value="Baja California Sur">Baja California Sur</option>
+                                <option value="Campeche">Campeche</option>
+                                <option value="Chiapas">Chiapas</option>
+                                <option value="Chihuahua">Chihuahua</option>
+                                <option value="Ciudad de México">Ciudad de México</option>
+                                <option value="Coahuila">Coahuila</option>
+                                <option value="Colima">Colima</option>
+                                <option value="Durango">Durango</option>
+                                <option value="Estado de México">Estado de México</option>
+                                <option value="Guanajuato">Guanajuato</option>
+                                <option value="Guerrero">Guerrero</option>
+                                <option value="Hidalgo">Hidalgo</option>
+                                <option value="Jalisco">Jalisco</option>
+                                <option value="Michoacán">Michoacán</option>
+                                <option value="Morelos">Morelos</option>
+                                <option value="Nayarit">Nayarit</option>
+                                <option value="Nuevo León">Nuevo León</option>
+                                <option value="Oaxaca">Oaxaca</option>
+                                <option value="Puebla">Puebla</option>
+                                <option value="Querétaro">Querétaro</option>
+                                <option value="Quintana Roo">Quintana Roo</option>
+                                <option value="San Luis Potosí">San Luis Potosí</option>
+                                <option value="Sinaloa">Sinaloa</option>
+                                <option value="Sonora">Sonora</option>
+                                <option value="Tabasco">Tabasco</option>
+                                <option value="Tamaulipas">Tamaulipas</option>
+                                <option value="Tlaxcala">Tlaxcala</option>
+                                <option value="Veracruz">Veracruz</option>
+                                <option value="Yucatán">Yucatán</option>
+                                <option value="Zacatecas">Zacatecas</option>
+                            </select>
                         </div>
-                    </div>
-
-                    <!-- Sección: Cambiar Contraseña -->
-                    <div class="form-section">
-                        <h4 class="section-header">Cambiar Contraseña</h4>
-                        <p class="section-desc">Deja en blanco si no deseas cambiar tu contraseña.</p>
 
                         <div class="form-group">
-                            <label for="editContrasenaActual" class="form-label">Contraseña Actual</label>
-                            <div class="input-password-wrap">
-                                <input type="password" class="form-control" id="editContrasenaActual"
-                                    placeholder="Ingresa tu contraseña actual" maxlength="30">
-                                <button type="button" class="btn-toggle-pw" data-target="editContrasenaActual" title="Mostrar/ocultar">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="editContrasenaNueva" class="form-label">Nueva Contraseña</label>
-                            <div class="input-password-wrap">
-                                <input type="password" class="form-control" id="editContrasenaNueva"
-                                    placeholder="Mínimo 6 caracteres, máximo 30" maxlength="30">
-                                <button type="button" class="btn-toggle-pw" data-target="editContrasenaNueva" title="Mostrar/ocultar">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                            <small class="form-text text-muted" id="pwStrengthMsg"></small>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="editContrasenaConfirmar" class="form-label">Confirmar Nueva Contraseña</label>
-                            <div class="input-password-wrap">
-                                <input type="password" class="form-control" id="editContrasenaConfirmar"
-                                    placeholder="Repite la nueva contraseña" maxlength="30">
-                                <button type="button" class="btn-toggle-pw" data-target="editContrasenaConfirmar" title="Mostrar/ocultar">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                            <small class="form-text" id="pwMatchMsg"></small>
+                            <label for="editCiudad" class="form-label">Ciudad / Municipio</label>
+                            <select class="form-control" id="editCiudad">
+                                <option value="">Selecciona primero un estado</option>
+                            </select>
                         </div>
                     </div>
 
