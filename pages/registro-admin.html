@@ -284,7 +284,13 @@
 
     function mostrarError(id, msg) {
         const el = document.getElementById(id);
-        if (el) { el.textContent = msg; el.style.color = '#ef4444'; }
+        if (el) {
+            el.textContent = msg;
+            el.style.color = '#ef4444';
+            el.style.fontWeight = '600';
+            el.style.display = 'block';
+            el.style.marginTop = '4px';
+        }
     }
     function limpiarError(id) {
         const el = document.getElementById(id);
@@ -308,13 +314,13 @@
         ['errorNombre','errorCorreo','errorEmpleado','errorArea','errorRol','errorUsuario','errorPassword','errorConfirmar','errorClave'].forEach(limpiarError);
 
         if (nombre.length < 3) { mostrarError('errorNombre','Ingresa tu nombre completo.'); valido=false; }
-        if (numEmp.length < 2) { mostrarError('errorEmpleado','Ingresa tu número de empleado.'); valido=false; }
+        if (numEmp.length < 1) { mostrarError('errorEmpleado','Ingresa tu número de empleado.'); valido=false; }
         if (area.length < 2)   { mostrarError('errorArea','Ingresa tu área o departamento.'); valido=false; }
-        if (!rol)              { mostrarError('errorRol','Selecciona un rol.'); valido=false; }
+        if (!rol)              { mostrarError('errorRol','Selecciona un rol de la lista.'); valido=false; }
         if (usuario.length < 3){ mostrarError('errorUsuario','El usuario debe tener al menos 3 caracteres.'); valido=false; }
         if (pass.length < 8)   { mostrarError('errorPassword','La contraseña debe tener al menos 8 caracteres.'); valido=false; }
         if (pass !== conf)     { mostrarError('errorConfirmar','Las contraseñas no coinciden.'); valido=false; }
-        if (clave !== CLAVE_MAESTRA_ADMIN) { mostrarError('errorClave','Clave de acceso incorrecta.'); valido=false; }
+        if (clave !== CLAVE_MAESTRA_ADMIN) { mostrarError('errorClave','Clave de acceso incorrecta. Solicítala al responsable del sistema.'); valido=false; }
 
         if (!valido) return;
 
