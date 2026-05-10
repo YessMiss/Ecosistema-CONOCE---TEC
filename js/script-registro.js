@@ -379,6 +379,20 @@ document.addEventListener('DOMContentLoaded', function() {
             alumnosArr.push({ nombre: nombre, correo: correo, fecha: fechaReg, numControl: numCtrl });
             localStorage.setItem('alumnosRegistrados', JSON.stringify(alumnosArr));
             localStorage.setItem('ultimoUsuarioRegistrado', nombre);
+
+            // Guardar perfil inicial con clave por correo para persistencia entre sesiones
+            var perfilInicial = {
+                nombre:        nombre,
+                correo:        correo,
+                numControl:    numCtrl,
+                carrera:       '',
+                semestre:      '',
+                telefono:      '',
+                telEmergencia: '',
+                direccion:     '',
+                ciudad:        ''
+            };
+            localStorage.setItem('perfil_' + correo, JSON.stringify(perfilInicial));
             // Guardar también en el servidor para que el admin lo vea
             fetch('/api/users/alumno', {
               method: 'POST',

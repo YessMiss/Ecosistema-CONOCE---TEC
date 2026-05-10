@@ -48,33 +48,72 @@ document.addEventListener('DOMContentLoaded', function() {
 // ========================================
 
 function cargarDatosUsuario() {
-    const nombreUsuario = sessionStorage.getItem('nombreUsuario') ||
-                          sessionStorage.getItem('usuarioActual') ||
-                          localStorage.getItem('nombreUsuarioActual') ||
-                          localStorage.getItem('nombreAlumno') ||
-                          'Juan Pérez García';
+    // Identificar al alumno actual por su correo
+    var correoUsuario = sessionStorage.getItem('correoUsuario') ||
+                        localStorage.getItem('correoUsuarioActual') ||
+                        localStorage.getItem('correoAlumno') || '';
 
-    const correoUsuario = sessionStorage.getItem('correoUsuario') ||
-                          localStorage.getItem('correoUsuarioActual') ||
-                          localStorage.getItem('correoAlumno') ||
-                          'juan.perez@estudiante.edu.mx';
+    // Cargar perfil guardado específico de este alumno (si ya editó su perfil antes)
+    var perfilGuardado = {};
+    if (correoUsuario) {
+        try { perfilGuardado = JSON.parse(localStorage.getItem('perfil_' + correoUsuario) || '{}'); } catch(e) {}
+    }
 
-    const telefono      = sessionStorage.getItem('telefonoUsuario')    || '+52 921 1234567';
-    const numeroControl = sessionStorage.getItem('numeroControl')      || localStorage.getItem('numControlGuardado')  || '';
-    const carrera       = sessionStorage.getItem('carreraUsuario')     || localStorage.getItem('carreraGuardada')      || '';
-    const semestre      = sessionStorage.getItem('semestreUsuario')    || localStorage.getItem('semestreGuardado')     || '';
-    const telEmergencia = sessionStorage.getItem('telefonoEmergencia') || '+52 921 7654321';
-    const direccion     = sessionStorage.getItem('direccionUsuario')   || 'Calle Principal 123, Minatitlán, Veracruz';
-    const ciudad        = sessionStorage.getItem('ciudadUsuario')      || 'Minatitlán, Veracruz';
+    // Buscar en alumnosRegistrados para recuperar datos del registro inicial
+    var numControlRegistro = '';
+    var carreraRegistro    = '';
+    var semestreRegistro   = '';
+    if (correoUsuario) {
+        var alumnosArr = JSON.parse(localStorage.getItem('alumnosRegistrados') || '[]');
+        var alumnoReg = alumnosArr.find(function(a) { return (a.correo || a.email) === correoUsuario; });
+        if (alumnoReg) {
+            numControlRegistro = alumnoReg.numControl || alumnoReg.numeroControl || '';
+            carreraRegistro    = alumnoReg.carrera    || '';
+            semestreRegistro   = alumnoReg.semestre   || '';
+        }
+    }
+
+    var nombreUsuario = perfilGuardado.nombre ||
+                        sessionStorage.getItem('nombreUsuario') ||
+                        sessionStorage.getItem('usuarioActual') ||
+                        localStorage.getItem('nombreUsuarioActual') || '—';
+
+    var numControl = perfilGuardado.numControl ||
+                     sessionStorage.getItem('numeroControl') ||
+                     localStorage.getItem('numControlActual') ||
+                     localStorage.getItem('numControlGuardado') ||
+                     numControlRegistro || '';
+
+    var carrera  = perfilGuardado.carrera  || sessionStorage.getItem('carreraUsuario')  || localStorage.getItem('carreraActual')  || localStorage.getItem('carreraGuardada')  || carreraRegistro  || '';
+    var semestre = perfilGuardado.semestre || sessionStorage.getItem('semestreUsuario') || localStorage.getItem('semestreActual') || localStorage.getItem('semestreGuardado') || semestreRegistro || '';
+    var telefono      = perfilGuardado.telefono      || sessionStorage.getItem('telefonoUsuario')    || '';
+    var telEmergencia = perfilGuardado.telEmergencia || sessionStorage.getItem('telefonoEmergencia') || '';
+    var direccion     = perfilGuardado.direccion     || sessionStorage.getItem('direccionUsuario')   || '';
+    var ciudad        = perfilGuardado.ciudad        || sessionStorage.getItem('ciudadUsuario')      || '';
+
+    // Si encontramos datos en el perfil guardado, sincronizamos sessionStorage
+    // para que la sesión actual los tenga disponibles
+    if (perfilGuardado.nombre) {
+        sessionStorage.setItem('nombreUsuario',      perfilGuardado.nombre);
+        sessionStorage.setItem('usuarioActual',      perfilGuardado.nombre);
+        sessionStorage.setItem('correoUsuario',      correoUsuario);
+        if (numControl)     sessionStorage.setItem('numeroControl',       numControl);
+        if (carrera)        sessionStorage.setItem('carreraUsuario',      carrera);
+        if (semestre)       sessionStorage.setItem('semestreUsuario',     semestre);
+        if (telefono)       sessionStorage.setItem('telefonoUsuario',     telefono);
+        if (telEmergencia)  sessionStorage.setItem('telefonoEmergencia',  telEmergencia);
+        if (direccion)      sessionStorage.setItem('direccionUsuario',    direccion);
+        if (ciudad)         sessionStorage.setItem('ciudadUsuario',       ciudad);
+    }
 
     setText('profileName',  nombreUsuario);
     setText('profileEmail', correoUsuario);
     setText('infoNombre',    nombreUsuario);
     setText('infoCorreo',    correoUsuario);
     setText('infoTelefono',  telefono);
-    setText('infoMatricula', numeroControl || '—');
-    setText('infoCarrera',   carrera);
-    setText('infoSemestre',  semestre);
+    setText('infoMatricula', numControl || '—');
+    setText('infoCarrera',   carrera    || '—');
+    setText('infoSemestre',  semestre   || '—');
     setText('infoTelefonoCelular',    telefono);
     setText('infoTelefonoEmergencia', telEmergencia);
     setText('infoDireccion', direccion);

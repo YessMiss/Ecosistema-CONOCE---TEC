@@ -17,26 +17,52 @@ document.addEventListener('DOMContentLoaded', function() {
 // ========================================
 
 function cargarDatosFormulario() {
-    // Obtener datos del usuario desde sessionStorage
-    const nombreUsuario = sessionStorage.getItem('usuarioActual') ||
-                          sessionStorage.getItem('nombreUsuario') ||
-                          localStorage.getItem('nombreUsuarioActual') || 'Juan Pérez García';
-    const correoUsuario = sessionStorage.getItem('correoUsuario') ||
-                          localStorage.getItem('correoUsuarioActual') || 'juan.perez@estudiante.edu.mx';
-    
-    // Llenar el formulario con los datos actuales
-    document.getElementById('editNombre').value = nombreUsuario;
-    document.getElementById('editCorreo').value = correoUsuario;
-    const numControl = sessionStorage.getItem('numeroControl') || '';
-    document.getElementById('editMatricula').value = numControl;
-    document.getElementById('editCarrera').value = sessionStorage.getItem('carreraUsuario') || '';
-    document.getElementById('editSemestre').value = sessionStorage.getItem('semestreUsuario') || '';
-    document.getElementById('editTelefono').value = '+52 921 1234567';
-    document.getElementById('editTelefonoEmergencia').value = '+52 921 7654321';
-    document.getElementById('editDireccion').value = 'Calle Principal 123, Minatitlán, Veracruz';
-    document.getElementById('editCiudad').value = 'Minatitlán, Veracruz';
-    
-    console.log('Datos del formulario cargados');
+    // Correo del alumno actual (identifica su perfil)
+    var correoUsuario = sessionStorage.getItem('correoUsuario') ||
+                        localStorage.getItem('correoUsuarioActual') ||
+                        localStorage.getItem('correoAlumno') || '';
+
+    // Intentar cargar perfil guardado específico de este alumno
+    var perfilGuardado = {};
+    if (correoUsuario) {
+        try { perfilGuardado = JSON.parse(localStorage.getItem('perfil_' + correoUsuario) || '{}'); } catch(e) {}
+    }
+
+    // También buscar en alumnosRegistrados para recuperar numControl del registro
+    var numControlRegistro = '';
+    if (correoUsuario) {
+        var alumnosArr = JSON.parse(localStorage.getItem('alumnosRegistrados') || '[]');
+        var alumnoReg = alumnosArr.find(function(a) { return (a.correo || a.email) === correoUsuario; });
+        if (alumnoReg) numControlRegistro = alumnoReg.numControl || alumnoReg.numeroControl || '';
+    }
+
+    var nombreUsuario = perfilGuardado.nombre ||
+                        sessionStorage.getItem('usuarioActual') ||
+                        sessionStorage.getItem('nombreUsuario') ||
+                        localStorage.getItem('nombreUsuarioActual') || '';
+
+    var numControl = perfilGuardado.numControl ||
+                     sessionStorage.getItem('numeroControl') ||
+                     localStorage.getItem('numControlActual') ||
+                     localStorage.getItem('numControlGuardado') ||
+                     numControlRegistro || '';
+
+    var carrera  = perfilGuardado.carrera  || sessionStorage.getItem('carreraUsuario')  || localStorage.getItem('carreraActual')  || localStorage.getItem('carreraGuardada')  || '';
+    var semestre = perfilGuardado.semestre || sessionStorage.getItem('semestreUsuario') || localStorage.getItem('semestreActual') || localStorage.getItem('semestreGuardado') || '';
+    var telefono       = perfilGuardado.telefono       || sessionStorage.getItem('telefonoUsuario')    || '';
+    var telEmergencia  = perfilGuardado.telEmergencia  || sessionStorage.getItem('telefonoEmergencia') || '';
+    var direccion      = perfilGuardado.direccion      || sessionStorage.getItem('direccionUsuario')   || '';
+    var ciudad         = perfilGuardado.ciudad         || sessionStorage.getItem('ciudadUsuario')      || '';
+
+    document.getElementById('editNombre').value              = nombreUsuario;
+    document.getElementById('editCorreo').value              = correoUsuario;
+    document.getElementById('editMatricula').value           = numControl;
+    document.getElementById('editCarrera').value             = carrera;
+    document.getElementById('editSemestre').value            = semestre;
+    document.getElementById('editTelefono').value            = telefono;
+    document.getElementById('editTelefonoEmergencia').value  = telEmergencia;
+    document.getElementById('editDireccion').value           = direccion;
+    document.getElementById('editCiudad').value              = ciudad;
 }
 
 // ========================================
@@ -125,16 +151,15 @@ function configurarEventos() {
 // ========================================
 
 function guardarCambios() {
-    // Obtener valores del formulario
-    const nombre = document.getElementById('editNombre').value.trim();
-    const correo = document.getElementById('editCorreo').value.trim();
-    const telefono = document.getElementById('editTelefono').value.trim();
-    const matricula = document.getElementById('editMatricula').value.trim();
-    const carrera = document.getElementById('editCarrera').value;
-    const semestre = document.getElementById('editSemestre').value;
-    const telefonoEmergencia = document.getElementById('editTelefonoEmergencia').value.trim();
-    const direccion = document.getElementById('editDireccion').value.trim();
-    const ciudad = document.getElementById('editCiudad').value.trim();
+    var nombre            = document.getElementById('editNombre').value.trim();
+    var correo            = document.getElementById('editCorreo').value.trim();
+    var telefono          = document.getElementById('editTelefono').value.trim();
+    var matricula         = document.getElementById('editMatricula').value.trim();
+    var carrera           = document.getElementById('editCarrera').value;
+    var semestre          = document.getElementById('editSemestre').value;
+    var telefonoEmergencia= document.getElementById('editTelefonoEmergencia').value.trim();
+    var direccion         = document.getElementById('editDireccion').value.trim();
+    var ciudad            = document.getElementById('editCiudad').value.trim();
 
     // Validar campos requeridos
     if (!nombre || !correo) {
@@ -142,18 +167,18 @@ function guardarCambios() {
         return;
     }
 
-    // Validar formato de correo
     if (!validarCorreo(correo)) {
         mostrarAlerta('Por favor ingresa un correo válido', 'warning');
         return;
     }
 
-    // Validar cambio de contraseña (solo si se llenó algún campo)
-    const pwActual = document.getElementById('editContrasenaActual') ? document.getElementById('editContrasenaActual').value : '';
-    const pwNueva = document.getElementById('editContrasenaNueva') ? document.getElementById('editContrasenaNueva').value : '';
-    const pwConfirmar = document.getElementById('editContrasenaConfirmar') ? document.getElementById('editContrasenaConfirmar').value : '';
+    // Cambio de contraseña: SOLO si el alumno llenó algún campo de contraseña
+    var pwActual    = document.getElementById('editContrasenaActual')    ? document.getElementById('editContrasenaActual').value    : '';
+    var pwNueva     = document.getElementById('editContrasenaNueva')     ? document.getElementById('editContrasenaNueva').value     : '';
+    var pwConfirmar = document.getElementById('editContrasenaConfirmar') ? document.getElementById('editContrasenaConfirmar').value : '';
 
     if (pwNueva || pwConfirmar || pwActual) {
+        // Solo entonces validamos la contraseña
         if (!pwActual) {
             mostrarAlerta('Ingresa tu contraseña actual para cambiarla', 'warning');
             return;
@@ -166,36 +191,63 @@ function guardarCambios() {
             mostrarAlerta('Las contraseñas nuevas no coinciden', 'warning');
             return;
         }
-        // Guardar nueva contraseña
+        // Guardar nueva contraseña en el perfil del alumno
+        localStorage.setItem('contrasena_' + correo, pwNueva);
         sessionStorage.setItem('contrasenaUsuario', pwNueva);
-        console.log('Contraseña actualizada');
     }
 
-    // Guardar en sessionStorage
-    sessionStorage.setItem('usuarioActual', nombre);
-    sessionStorage.setItem('nombreUsuario', nombre);
-    sessionStorage.setItem('correoUsuario', correo);
-    sessionStorage.setItem('telefonoUsuario', telefono);
-    if (matricula) sessionStorage.setItem('numeroControl', matricula);
-    sessionStorage.setItem('carreraUsuario', carrera);
-    sessionStorage.setItem('semestreUsuario', semestre);
-    sessionStorage.setItem('telefonoEmergencia', telefonoEmergencia);
-    sessionStorage.setItem('direccionUsuario', direccion);
-    sessionStorage.setItem('ciudadUsuario', ciudad);
+    // ── Guardar perfil con clave por correo (persiste entre sesiones) ──────
+    var perfilData = {
+        nombre:         nombre,
+        correo:         correo,
+        numControl:     matricula,
+        carrera:        carrera,
+        semestre:       semestre,
+        telefono:       telefono,
+        telEmergencia:  telefonoEmergencia,
+        direccion:      direccion,
+        ciudad:         ciudad
+    };
+    localStorage.setItem('perfil_' + correo, JSON.stringify(perfilData));
 
-    // Persistir todos los datos en localStorage para que sobrevivan entre sesiones
-    localStorage.setItem('nombreUsuarioActual', nombre);
-    localStorage.setItem('correoUsuarioActual', correo);
-    if (matricula) localStorage.setItem('numControlGuardado', matricula);
-    localStorage.setItem('carreraGuardada', carrera);
+    // ── También actualizar claves genéricas para compatibilidad ────────────
+    localStorage.setItem('nombreUsuarioActual',  nombre);
+    localStorage.setItem('correoUsuarioActual',  correo);
+    if (matricula) {
+        localStorage.setItem('numControlActual',   matricula);
+        localStorage.setItem('numControlGuardado', matricula);
+    }
+    localStorage.setItem('carreraActual',    carrera);
+    localStorage.setItem('carreraGuardada',  carrera);
+    localStorage.setItem('semestreActual',   semestre);
     localStorage.setItem('semestreGuardado', semestre);
 
-    console.log('Cambios guardados:', { nombre, correo, carrera, semestre });
+    // ── Actualizar sessionStorage para la sesión actual ────────────────────
+    sessionStorage.setItem('usuarioActual',       nombre);
+    sessionStorage.setItem('nombreUsuario',       nombre);
+    sessionStorage.setItem('correoUsuario',       correo);
+    sessionStorage.setItem('telefonoUsuario',     telefono);
+    if (matricula) sessionStorage.setItem('numeroControl', matricula);
+    sessionStorage.setItem('carreraUsuario',      carrera);
+    sessionStorage.setItem('semestreUsuario',     semestre);
+    sessionStorage.setItem('telefonoEmergencia',  telefonoEmergencia);
+    sessionStorage.setItem('direccionUsuario',    direccion);
+    sessionStorage.setItem('ciudadUsuario',       ciudad);
 
-    // Mostrar mensaje de éxito
+    // ── Actualizar también en el array alumnosRegistrados ──────────────────
+    var alumnosArr = JSON.parse(localStorage.getItem('alumnosRegistrados') || '[]');
+    var idx = alumnosArr.findIndex(function(a) { return (a.correo || a.email) === correo; });
+    if (idx !== -1) {
+        alumnosArr[idx].nombreCompleto = nombre;
+        alumnosArr[idx].nombre        = nombre;
+        alumnosArr[idx].numControl    = matricula;
+        alumnosArr[idx].carrera       = carrera;
+        alumnosArr[idx].semestre      = semestre;
+        localStorage.setItem('alumnosRegistrados', JSON.stringify(alumnosArr));
+    }
+
     mostrarAlerta('¡Perfil actualizado correctamente!', 'success');
 
-    // Redirigir al perfil después de 1.5 segundos
     setTimeout(function() {
         window.location.href = 'perfil-alumno.html';
     }, 1500);
