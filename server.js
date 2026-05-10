@@ -36,7 +36,12 @@ let usersMemory   = { alumnos: [], admins: [], visitantes: 0 };
 //  Middleware
 // ─────────────────────────────────────────────────────
 app.use(express.json());
-app.use(express.static(ROOT));
+app.use(express.static(ROOT, {
+  setHeaders: function(res, filePath) {
+    if (filePath.endsWith('.ico'))     res.setHeader('Content-Type', 'image/x-icon');
+    if (filePath.endsWith('.geojson')) res.setHeader('Content-Type', 'application/json');
+  }
+}));
 
 // ─────────────────────────────────────────────────────
 //  Inicializar reports.json (solo en local)
