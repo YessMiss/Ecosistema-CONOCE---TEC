@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
             sectionId = 'sectionDirectorio';
         } else if (sectionName === 'cafeteria') {
             sectionId = 'sectionCafeteria';
-            // Contador de visitas a cafetería
+            // Contador de visitas a sección cafetería
             var vc = parseInt(localStorage.getItem('visitasCafeteria') || '0', 10) + 1;
             localStorage.setItem('visitasCafeteria', vc);
         }

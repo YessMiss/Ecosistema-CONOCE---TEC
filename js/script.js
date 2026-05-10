@@ -190,16 +190,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.setItem('correoUsuarioActual', '');
             }
 
-            // Restaurar datos académicos desde localStorage a sessionStorage
-            var numCtrlGuardado  = localStorage.getItem('numControlActual') || '';
-            var carreraGuardada  = localStorage.getItem('carreraActual')    || '';
-            var semestreGuardado = localStorage.getItem('semestreActual')   || '';
-            var nombreCompleto   = localStorage.getItem('nombreCompletoActual') || '';
-            if (numCtrlGuardado)  sessionStorage.setItem('numeroControl',   numCtrlGuardado);
-            if (carreraGuardada)  sessionStorage.setItem('carreraUsuario',  carreraGuardada);
-            if (semestreGuardado) sessionStorage.setItem('semestreUsuario', semestreGuardado);
-            if (nombreCompleto)   sessionStorage.setItem('nombreUsuario',   nombreCompleto);
-
             mostrarAlerta('¡Bienvenido ' + usuario + '! Acceso de alumno concedido.', 'success');
             
             // Cerrar modal después de 1.5 segundos
@@ -232,6 +222,10 @@ document.addEventListener('DOMContentLoaded', function() {
             sessionStorage.setItem('emailVisitante', email);
             sessionStorage.setItem('motivoVisita', motivo);
             sessionStorage.setItem('horaLogin', new Date().toLocaleTimeString());
+            // También en localStorage para que sobreviva redirecciones en Vercel
+            localStorage.setItem('tipoUsuarioActual', 'visitante');
+            localStorage.setItem('nombreVisitanteActual', nombre);
+            localStorage.setItem('emailVisitanteActual', email);
 
             mostrarAlerta('¡Bienvenido ' + nombre + '! Acceso de visitante concedido.', 'success');
             
