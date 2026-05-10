@@ -59,20 +59,13 @@ function cargarDatosUsuario() {
                           localStorage.getItem('correoAlumno') ||
                           'juan.perez@estudiante.edu.mx';
 
-    const telefono      = sessionStorage.getItem('telefonoUsuario')    ||
-                          localStorage.getItem('telefonoActual')       || '';
-    const numeroControl = sessionStorage.getItem('numeroControl')      ||
-                          localStorage.getItem('numControlActual')     || '';
-    const carrera       = sessionStorage.getItem('carreraUsuario')     ||
-                          localStorage.getItem('carreraActual')        || '';
-    const semestre      = sessionStorage.getItem('semestreUsuario')    ||
-                          localStorage.getItem('semestreActual')       || '';
-    const telEmergencia = sessionStorage.getItem('telefonoEmergencia') ||
-                          localStorage.getItem('telefonoEmergenciaActual') || '';
-    const direccion     = sessionStorage.getItem('direccionUsuario')   ||
-                          localStorage.getItem('direccionActual')      || '';
-    const ciudad        = sessionStorage.getItem('ciudadUsuario')      ||
-                          localStorage.getItem('ciudadActual')         || '';
+    const telefono      = sessionStorage.getItem('telefonoUsuario')    || '+52 921 1234567';
+    const numeroControl = sessionStorage.getItem('numeroControl')      || localStorage.getItem('numControlGuardado')  || '';
+    const carrera       = sessionStorage.getItem('carreraUsuario')     || localStorage.getItem('carreraGuardada')      || '';
+    const semestre      = sessionStorage.getItem('semestreUsuario')    || localStorage.getItem('semestreGuardado')     || '';
+    const telEmergencia = sessionStorage.getItem('telefonoEmergencia') || '+52 921 7654321';
+    const direccion     = sessionStorage.getItem('direccionUsuario')   || 'Calle Principal 123, Minatitlán, Veracruz';
+    const ciudad        = sessionStorage.getItem('ciudadUsuario')      || 'Minatitlán, Veracruz';
 
     setText('profileName',  nombreUsuario);
     setText('profileEmail', correoUsuario);

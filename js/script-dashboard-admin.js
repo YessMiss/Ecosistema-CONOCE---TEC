@@ -265,18 +265,6 @@ function actualizarKPIs() {
     }).catch(function() {
         visitas = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
     });
-
-    // Cargar visitas a cafetería
-    fetch('/api/cafeteria/visits').then(r => r.json()).then(function(c) {
-        var total = c.total || 0;
-        var hoy   = c.hoy   || 0;
-        set('kpiVisitasCafeteria', total);
-        set('kpiVisitasCafeteriaHoy', hoy);
-        setText('resumCafeteria', total > 0 ? total + ' visita(s) a Cafetería' : 'Sin visitas a Cafetería aún');
-    }).catch(function() {
-        var cf = parseInt(localStorage.getItem('visitasCafeteria') || '0', 10);
-        set('kpiVisitasCafeteria', cf);
-    });
     var menus       = JSON.parse(localStorage.getItem('menusCafeteria')    || '[]');
     var contactos   = JSON.parse(localStorage.getItem('contactosTECAdmin') || '[]');
     var bloqueados  = JSON.parse(localStorage.getItem('usuariosBloqueados')|| '[]');
@@ -287,6 +275,10 @@ function actualizarKPIs() {
     set('kpiUsuariosReg',    registrados);
     set('kpiMenus',          menus.length);
     set('kpiContactos',      contactos.filter(function(c){return !c.esInstitucional;}).length);
+
+    // Visitas a sección Cafetería (contadas en localStorage por alumno/visitante)
+    var visitasCafe = parseInt(localStorage.getItem('visitasCafeteria') || '0', 10);
+    set('kpiVisitasCafeteria', visitasCafe);
 
     var hoy = new Date().toDateString();
     if (localStorage.getItem('ultimoDiaVisita') !== hoy) {
@@ -529,18 +521,6 @@ function generarNotificaciones() {
         bit('bitMsgVisitas', visitas > 0 ? visitas + ' visita(s) acumuladas.' : 'Sin visitas aún.');
     }).catch(function() {
         visitas = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
-    });
-
-    // Cargar visitas a cafetería
-    fetch('/api/cafeteria/visits').then(r => r.json()).then(function(c) {
-        var total = c.total || 0;
-        var hoy   = c.hoy   || 0;
-        set('kpiVisitasCafeteria', total);
-        set('kpiVisitasCafeteriaHoy', hoy);
-        setText('resumCafeteria', total > 0 ? total + ' visita(s) a Cafetería' : 'Sin visitas a Cafetería aún');
-    }).catch(function() {
-        var cf = parseInt(localStorage.getItem('visitasCafeteria') || '0', 10);
-        set('kpiVisitasCafeteria', cf);
     });
     var errores     = JSON.parse(localStorage.getItem('reportesError')     || '[]');
     var notifs = [];
@@ -1067,18 +1047,6 @@ function exportarReporte() {
         bit('bitMsgVisitas', visitas > 0 ? visitas + ' visita(s) acumuladas.' : 'Sin visitas aún.');
     }).catch(function() {
         visitas = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
-    });
-
-    // Cargar visitas a cafetería
-    fetch('/api/cafeteria/visits').then(r => r.json()).then(function(c) {
-        var total = c.total || 0;
-        var hoy   = c.hoy   || 0;
-        set('kpiVisitasCafeteria', total);
-        set('kpiVisitasCafeteriaHoy', hoy);
-        setText('resumCafeteria', total > 0 ? total + ' visita(s) a Cafetería' : 'Sin visitas a Cafetería aún');
-    }).catch(function() {
-        var cf = parseInt(localStorage.getItem('visitasCafeteria') || '0', 10);
-        set('kpiVisitasCafeteria', cf);
     });
     var menus       = JSON.parse(localStorage.getItem('menusCafeteria')    || '[]');
     var contactos   = JSON.parse(localStorage.getItem('contactosTECAdmin') || '[]');

@@ -183,17 +183,12 @@ function guardarCambios() {
     sessionStorage.setItem('direccionUsuario', direccion);
     sessionStorage.setItem('ciudadUsuario', ciudad);
 
-    // Persistir TODOS los datos en localStorage para que sobrevivan entre sesiones
+    // Persistir todos los datos en localStorage para que sobrevivan entre sesiones
     localStorage.setItem('nombreUsuarioActual', nombre);
-    localStorage.setItem('nombreCompletoActual', nombre);
     localStorage.setItem('correoUsuarioActual', correo);
-    if (matricula) localStorage.setItem('numControlActual', matricula);
-    localStorage.setItem('carreraActual', carrera);
-    localStorage.setItem('semestreActual', semestre);
-    localStorage.setItem('telefonoActual', telefono);
-    localStorage.setItem('telefonoEmergenciaActual', telefonoEmergencia);
-    localStorage.setItem('direccionActual', direccion);
-    localStorage.setItem('ciudadActual', ciudad);
+    if (matricula) localStorage.setItem('numControlGuardado', matricula);
+    localStorage.setItem('carreraGuardada', carrera);
+    localStorage.setItem('semestreGuardado', semestre);
 
     console.log('Cambios guardados:', { nombre, correo, carrera, semestre });
 
