@@ -235,114 +235,78 @@ function actualizarAvatars(src) {
 // KPIs REALES
 // =============================================
 function actualizarKPIs() {
-    // Cargar usuarios desde servidor y actualizar contadores
-    fetch('/api/users').then(r => r.json()).then(function(serverUsers) {
-        var alumnosServer = serverUsers.alumnos || [];
-        var adminsServer  = serverUsers.admins  || [];
-        var visServer     = serverUsers.visitantes || 0;
-        // Merge con localStorage para no perder datos locales
-        var alumnosLocal = JSON.parse(localStorage.getItem('alumnosRegistrados') || '[]');
-        alumnosLocal.forEach(function(la) {
-            if (!alumnosServer.find(function(sa) { return sa.correo === la.correo; })) {
-                alumnosServer.push(la);
-            }
-        });
-        // Actualizar KPIs con datos del servidor
-        var elAl = document.getElementById('kpiAlumnos');
-        var elVi = document.getElementById('kpiVisitantes');
-        var elAd = document.getElementById('kpiAdmins');
-        if (elAl) elAl.textContent = alumnosServer.length;
-        if (elVi) elVi.textContent = visServer;
-        if (elAd) elAd.textContent = adminsServer.length || 1;
-        // Actualizar localStorage con datos del servidor para otras funciones
-        localStorage.setItem('alumnosRegistrados', JSON.stringify(alumnosServer));
-    }).catch(function() { console.warn('Sin conexión al servidor, usando localStorage'); });
+    var registrados   = parseInt(localStorage.getItem('contadorRegistrados') || '0', 10);
+    var visitas       = parseInt(localStorage.getItem('contadorVisitas')     || '0', 10);
+    var visitasHoy    = parseInt(localStorage.getItem('contadorVisitasHoy') || '0', 10);
+    var menus         = JSON.parse(localStorage.getItem('menusCafeteria')    || '[]');
+    var contactos     = JSON.parse(localStorage.getItem('contactosTECAdmin') || '[]');
+    var bloqueados    = JSON.parse(localStorage.getItem('usuariosBloqueados')|| '[]');
+    var visitantesArr = JSON.parse(localStorage.getItem('visitantesRegistrados') || '[]');
+    var visitasCafe   = parseInt(localStorage.getItem('visitasCafeteria') || '0', 10);
+    var ultimo        = localStorage.getItem('ultimoUsuarioRegistrado') || '—';
 
-    var registrados = parseInt(localStorage.getItem('contadorRegistrados') || '0', 10);
-    var visitas = 0;
-    fetch('/api/visits').then(r => r.json()).then(function(v) {
-        visitas = v.total || 0;
-        var hoy = v.hoy || 0;
-        set('kpiVisitasTotales', visitas);
-        set('kpiVisitasHoy', hoy);
-        setText('resumVisitas', visitas > 0 ? visitas + ' visita(s)' : 'Sin visitas aún');
-        act('actVisitas', visitas + ' visita(s) registrada(s) en total.');
-        set('statKpiVisitas', visitas);
-        setText2('statVisTotal', String(visitas));
-        bit('bitMsgVisitas', visitas > 0 ? visitas + ' visita(s) acumuladas.' : 'Sin visitas aún.');
-    }).catch(function() {
-        visitas = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
-    });
-    var menus       = JSON.parse(localStorage.getItem('menusCafeteria')    || '[]');
-    var contactos   = JSON.parse(localStorage.getItem('contactosTECAdmin') || '[]');
-    var bloqueados  = JSON.parse(localStorage.getItem('usuariosBloqueados')|| '[]');
+    var set = function(id, val) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = val > 0 ? val.toLocaleString('es-MX') : '0';
+    };
+    var setText = function(id, val) { var el = document.getElementById(id); if (el) el.textContent = val; };
 
-    // KPI cards del dashboard principal
-    var set = function(id, val) { var el=document.getElementById(id); if(el) el.textContent=val>0?val.toLocaleString('es-MX'):'0'; };
+    // KPI cards dashboard principal
     set('kpiVisitasTotales', visitas);
     set('kpiUsuariosReg',    registrados);
+    set('kpiVisitasHoy',     visitasHoy);
     set('kpiMenus',          menus.length);
-    set('kpiContactos',      contactos.filter(function(c){return !c.esInstitucional;}).length);
-    // Visitas a sección Cafetería
-    var visitasCafe = parseInt(localStorage.getItem('visitasCafeteria') || '0', 10);
+    set('kpiContactos',      contactos.filter(function(c) { return !c.esInstitucional; }).length);
     set('kpiVisitasCafeteria', visitasCafe);
 
-    var hoy = new Date().toDateString();
-    if (localStorage.getItem('ultimoDiaVisita') !== hoy) {
-        localStorage.setItem('contadorVisitasHoy','0');
-        localStorage.setItem('ultimoDiaVisita', hoy);
-    }
-    set('kpiVisitasHoy', parseInt(localStorage.getItem('contadorVisitasHoy')||'0',10));
-
     // Resumen del sistema
-    var setText = function(id, val) { var el=document.getElementById(id); if(el) el.textContent=val; };
-    setText('resumVisitas',    visitas>0     ? visitas+' visita(s)'     : 'Sin visitas aún');
-    setText('resumRegistrados',registrados>0 ? registrados+' usuario(s)': 'Sin registros aún');
-    setText('resumContactos',  contactos.length+' contacto(s)');
+    setText('resumVisitas',     visitas > 0     ? visitas + ' visita(s)'      : 'Sin visitas aún');
+    setText('resumRegistrados', registrados > 0 ? registrados + ' usuario(s)' : 'Sin registros aún');
+    setText('resumContactos',   contactos.length + ' contacto(s)');
 
     // Actividad reciente
-    var act = function(id, txt) { var el=document.getElementById(id); if(el) el.textContent=txt; };
-    act('actVisitas',     visitas+' visita(s) registrada(s) en total.');
-    act('actRegistrados', registrados+' alumno(s) en el sistema.');
-    act('actMenus',       menus.length+' menú(s) publicado(s).');
-    var ultimo = localStorage.getItem('ultimoUsuarioRegistrado') || '—';
-    act('actNuevoUsuario', ultimo);
+    setText('actVisitas',     visitas + ' visita(s) registrada(s) en total.');
+    setText('actRegistrados', registrados + ' alumno(s) en el sistema.');
+    setText('actMenus',       menus.length + ' menú(s) publicado(s).');
+    setText('actNuevoUsuario', ultimo);
 
     // KPIs estadísticas
-    set('statKpiVisitas',    visitas);
-    set('statKpiRegistrados',registrados);
-    set('statKpiMenus',      menus.length);
-    set('statKpiContactos',  contactos.length);
-
-    // Visitantes registrados
-    var visitantesArr = JSON.parse(localStorage.getItem('visitantesRegistrados')||'[]');
-    set('statKpiVisitantes', visitantesArr.length);
+    set('statKpiVisitas',     visitas);
+    set('statKpiRegistrados', registrados);
+    set('statKpiMenus',       menus.length);
+    set('statKpiContactos',   contactos.length);
+    set('statKpiVisitantes',  visitantesArr.length);
 
     // Uso del sistema
-    setText('usoLogin',     localStorage.getItem('ctec_usoLogin')     || '0');
-    setText('usoRegistros', localStorage.getItem('ctec_usoRegistros') || '0');
-    setText('usoMapa',      localStorage.getItem('ctec_usoMapa')      || '0');
-    setText('usoDirectorio',localStorage.getItem('ctec_usoDirectorio')|| '0');
-    setText('usoCafeteria', localStorage.getItem('ctec_usoCafeteria') || '0');
+    setText('usoLogin',      localStorage.getItem('ctec_usoLogin')      || '0');
+    setText('usoRegistros',  localStorage.getItem('ctec_usoRegistros')  || '0');
+    setText('usoMapa',       localStorage.getItem('ctec_usoMapa')       || '0');
+    setText('usoDirectorio', localStorage.getItem('ctec_usoDirectorio') || '0');
+    setText('usoCafeteria',  localStorage.getItem('ctec_usoCafeteria')  || '0');
 
     // Usuarios bloqueados
     var ustatB = document.getElementById('ustatBloqueados');
     if (ustatB) ustatB.textContent = bloqueados.length;
 
     // Bitácora
-    var bit = function(id, txt) { var el=document.getElementById(id); if(el) el.textContent=txt; };
-    bit('bitMsgVisitas',  visitas>0     ? visitas+' visita(s) acumuladas.'         : 'Sin visitas aún.');
-    bit('bitMsgRegistros',registrados>0 ? registrados+' alumno(s) registrado(s).'  : 'Sin alumnos registrados aún.');
-    bit('bitMsgMenus',    menus.length>0 ? menus.length+' menú(s) en cafetería.'   : 'Sin menús publicados aún.');
+    setText('bitMsgVisitas',   visitas > 0     ? visitas + ' visita(s) acumuladas.'          : 'Sin visitas aún.');
+    setText('bitMsgRegistros', registrados > 0 ? registrados + ' alumno(s) registrado(s).'   : 'Sin alumnos registrados aún.');
+    setText('bitMsgMenus',     menus.length > 0 ? menus.length + ' menú(s) en cafetería.'    : 'Sin menús publicados aún.');
 
     // Estadísticas paneles
-    var setText2 = function(id, val) { var el=document.getElementById(id); if(el) el.textContent=val; };
-    setText2('statVisTotal',       String(visitas));
-    setText2('statRegTotal',       String(registrados));
-    setText2('statVisitantesTotal',String(visitantesArr.length));
-    setText2('statMenus',          menus.length+' publicado(s)');
-    setText2('statContactos',      contactos.length+' en directorio');
-    setText2('resumContactos',     contactos.length+' contacto(s)');
+    setText('statVisTotal',        String(visitas));
+    setText('statRegTotal',        String(registrados));
+    setText('statVisitantesTotal', String(visitantesArr.length));
+    setText('statMenus',           menus.length + ' publicado(s)');
+    setText('statContactos',       contactos.length + ' en directorio');
+    setText('resumContactos',      contactos.length + ' contacto(s)');
+
+    // Contador admins
+    var admins    = JSON.parse(localStorage.getItem('adminsRegistrados') || '[]');
+    var adminData = JSON.parse(localStorage.getItem('adminData') || 'null');
+    var numAdmins = admins.length || (adminData ? 1 : 0);
+    var ustatAd   = document.getElementById('ustatAdmins');
+    if (ustatAd) ustatAd.textContent = numAdmins;
 }
 
 function actualizarActividadReciente() { actualizarKPIs(); }
@@ -491,50 +455,14 @@ function generarNotificaciones() {
     var notifBadge = document.getElementById('notifBadge');
     if (!notifList) return;
 
-    // Cargar usuarios desde servidor y actualizar contadores
-    fetch('/api/users').then(r => r.json()).then(function(serverUsers) {
-        var alumnosServer = serverUsers.alumnos || [];
-        var adminsServer  = serverUsers.admins  || [];
-        var visServer     = serverUsers.visitantes || 0;
-        // Merge con localStorage para no perder datos locales
-        var alumnosLocal = JSON.parse(localStorage.getItem('alumnosRegistrados') || '[]');
-        alumnosLocal.forEach(function(la) {
-            if (!alumnosServer.find(function(sa) { return sa.correo === la.correo; })) {
-                alumnosServer.push(la);
-            }
-        });
-        // Actualizar KPIs con datos del servidor
-        var elAl = document.getElementById('kpiAlumnos');
-        var elVi = document.getElementById('kpiVisitantes');
-        var elAd = document.getElementById('kpiAdmins');
-        if (elAl) elAl.textContent = alumnosServer.length;
-        if (elVi) elVi.textContent = visServer;
-        if (elAd) elAd.textContent = adminsServer.length || 1;
-        // Actualizar localStorage con datos del servidor para otras funciones
-        localStorage.setItem('alumnosRegistrados', JSON.stringify(alumnosServer));
-    }).catch(function() { console.warn('Sin conexión al servidor, usando localStorage'); });
-
     var registrados = parseInt(localStorage.getItem('contadorRegistrados') || '0', 10);
-    var visitas = 0;
-    fetch('/api/visits').then(r => r.json()).then(function(v) {
-        visitas = v.total || 0;
-        var hoy = v.hoy || 0;
-        set('kpiVisitasTotales', visitas);
-        set('kpiVisitasHoy', hoy);
-        setText('resumVisitas', visitas > 0 ? visitas + ' visita(s)' : 'Sin visitas aún');
-        act('actVisitas', visitas + ' visita(s) registrada(s) en total.');
-        set('statKpiVisitas', visitas);
-        setText2('statVisTotal', String(visitas));
-        bit('bitMsgVisitas', visitas > 0 ? visitas + ' visita(s) acumuladas.' : 'Sin visitas aún.');
-    }).catch(function() {
-        visitas = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
-    });
+    var visitas     = parseInt(localStorage.getItem('contadorVisitas')     || '0', 10);
     var errores     = JSON.parse(localStorage.getItem('reportesError')     || '[]');
     var notifs = [];
 
-    if (registrados > 0) notifs.push({ icon:'fa-user-plus', color:'#3b82f6', title:'Usuarios registrados', sub:registrados+' alumno(s) en el sistema.', time:'Hoy' });
-    if (visitas > 0)     notifs.push({ icon:'fa-eye',       color:'#10b981', title:'Visitas registradas',  sub:visitas+' visita(s) en total.',          time:'Hoy' });
-    if (errores.length)  notifs.push({ icon:'fa-bug',       color:'#ef4444', title:'Reportes de error',    sub:errores.length+' reporte(s) pendiente(s).', time:'Revisar' });
+    if (registrados > 0) notifs.push({ icon:'fa-user-plus', color:'#3b82f6', title:'Usuarios registrados', sub: registrados + ' alumno(s) en el sistema.', time:'Hoy' });
+    if (visitas > 0)     notifs.push({ icon:'fa-eye',       color:'#10b981', title:'Visitas registradas',  sub: visitas + ' visita(s) en total.',           time:'Hoy' });
+    if (errores.length)  notifs.push({ icon:'fa-bug',       color:'#ef4444', title:'Reportes de error',    sub: errores.length + ' reporte(s) pendiente(s).', time:'Revisar' });
 
     if (notifs.length === 0) {
         notifList.innerHTML = '<div style="padding:16px;text-align:center;color:#888;font-size:.8rem;">Sin notificaciones. El sistema se actualizará conforme sea utilizado.</div>';
@@ -1032,44 +960,8 @@ function eliminarDir(idContacto) {
 // ESTADÍSTICAS — EXPORTAR REPORTE
 // =============================================
 function exportarReporte() {
-    // Cargar usuarios desde servidor y actualizar contadores
-    fetch('/api/users').then(r => r.json()).then(function(serverUsers) {
-        var alumnosServer = serverUsers.alumnos || [];
-        var adminsServer  = serverUsers.admins  || [];
-        var visServer     = serverUsers.visitantes || 0;
-        // Merge con localStorage para no perder datos locales
-        var alumnosLocal = JSON.parse(localStorage.getItem('alumnosRegistrados') || '[]');
-        alumnosLocal.forEach(function(la) {
-            if (!alumnosServer.find(function(sa) { return sa.correo === la.correo; })) {
-                alumnosServer.push(la);
-            }
-        });
-        // Actualizar KPIs con datos del servidor
-        var elAl = document.getElementById('kpiAlumnos');
-        var elVi = document.getElementById('kpiVisitantes');
-        var elAd = document.getElementById('kpiAdmins');
-        if (elAl) elAl.textContent = alumnosServer.length;
-        if (elVi) elVi.textContent = visServer;
-        if (elAd) elAd.textContent = adminsServer.length || 1;
-        // Actualizar localStorage con datos del servidor para otras funciones
-        localStorage.setItem('alumnosRegistrados', JSON.stringify(alumnosServer));
-    }).catch(function() { console.warn('Sin conexión al servidor, usando localStorage'); });
-
     var registrados = parseInt(localStorage.getItem('contadorRegistrados') || '0', 10);
-    var visitas = 0;
-    fetch('/api/visits').then(r => r.json()).then(function(v) {
-        visitas = v.total || 0;
-        var hoy = v.hoy || 0;
-        set('kpiVisitasTotales', visitas);
-        set('kpiVisitasHoy', hoy);
-        setText('resumVisitas', visitas > 0 ? visitas + ' visita(s)' : 'Sin visitas aún');
-        act('actVisitas', visitas + ' visita(s) registrada(s) en total.');
-        set('statKpiVisitas', visitas);
-        setText2('statVisTotal', String(visitas));
-        bit('bitMsgVisitas', visitas > 0 ? visitas + ' visita(s) acumuladas.' : 'Sin visitas aún.');
-    }).catch(function() {
-        visitas = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
-    });
+    var visitas     = parseInt(localStorage.getItem('contadorVisitas')     || '0', 10);
     var menus       = JSON.parse(localStorage.getItem('menusCafeteria')    || '[]');
     var contactos   = JSON.parse(localStorage.getItem('contactosTECAdmin') || '[]');
     var visitantes  = JSON.parse(localStorage.getItem('visitantesRegistrados') || '[]');
