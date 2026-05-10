@@ -111,6 +111,11 @@ document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.notif-item.unread').forEach(function (el) { el.classList.remove('unread'); });
             var badge = document.getElementById('notifBadge');
             if (badge) badge.style.display = 'none';
+            // También limpiar el badge del menú lateral
+            var snavBadge = document.getElementById('snavNotifBadge');
+            if (snavBadge) snavBadge.style.display = 'none';
+            // Guardar timestamp de última lectura para no volver a mostrar como nuevo
+            localStorage.setItem('notifUltimaLectura', new Date().toISOString());
         });
     }
 
@@ -629,6 +634,13 @@ function cargarTablaUsuarios() {
     if (ustatA) ustatA.textContent = alumnos;
     if (ustatV) ustatV.textContent = visitantes;
     if (ustatB) ustatB.textContent = bloqueados.length;
+
+    // Actualizar contador de administradores
+    var admins = JSON.parse(localStorage.getItem('adminsRegistrados') || '[]');
+    var adminData = JSON.parse(localStorage.getItem('adminData') || 'null');
+    var numAdmins = admins.length || (adminData ? 1 : 0);
+    var ustatAd = document.getElementById('ustatAdmins');
+    if (ustatAd) ustatAd.textContent = numAdmins;
 
     renderizarTablaUsuarios(todosUsuarios);
 }
@@ -1380,13 +1392,15 @@ function cargarPanelNotificaciones() {
         } else {
             solEl.innerHTML = recientes.map(function(a) {
                 var fecha = a.fecha ? (function(f){ var d=new Date(f); return isNaN(d)?f:d.toLocaleDateString('es-MX'); })(a.fecha) : '—';
-                return '<div class="solicitud-item">' +
+                var correo = a.correo || a.email || '—';
+                return '<div class="solicitud-item solicitud-item-link" style="cursor:pointer;" onclick="navegarPanel(\'usuarios-content\')" title="Ver en Gestión de Usuarios">' +
                     '<i class="fas fa-user-circle" style="font-size:1.4rem;color:#3b82f6;"></i>' +
                     '<div class="sol-info">' +
                         '<div class="sol-nombre">' + (a.nombreCompleto || a.nombre || '—') + '</div>' +
-                        '<div class="sol-fecha">' + (a.correo || '—') + ' · ' + fecha + '</div>' +
+                        '<div class="sol-fecha">' + correo + ' · ' + fecha + '</div>' +
                     '</div>' +
                     '<span class="sol-badge">Nuevo</span>' +
+                    '<i class="fas fa-chevron-right" style="color:#94a3b8;font-size:.75rem;margin-left:4px;flex-shrink:0;"></i>' +
                 '</div>';
             }).join('');
         }
@@ -1411,8 +1425,13 @@ function cargarPanelNotificaciones() {
         }
     }
 
-    // Actualizar badge en nav
-    var total = alumnos.length + reportes.length;
+    // Actualizar badge en nav — respetar última lectura
+    var ultimaLectura = localStorage.getItem('notifUltimaLectura');
+    var nuevosDesdeUltimaLectura = alumnos.filter(function(a) {
+        if (!ultimaLectura) return true;
+        return a.fecha && new Date(a.fecha) > new Date(ultimaLectura);
+    });
+    var total = nuevosDesdeUltimaLectura.length + reportes.length;
     var badge = document.getElementById('snavNotifBadge');
     if (badge) {
         if (total > 0) { badge.style.display = 'inline'; badge.textContent = total; }
@@ -1577,3 +1596,153 @@ function guardarFuncion(input) {
     cfg['funcion_' + input.getAttribute('data-funcion')] = input.checked;
     localStorage.setItem('sistemConfig', JSON.stringify(cfg));
 }
+
+// =============================================
+// SECCIÓN ADMINISTRADORES REGISTRADOS
+// =============================================
+function inicializarSeccionAdmins() {
+    // Card clickeable que muestra/oculta la sección
+    var cardAdmins = document.getElementById('ustatCardAdmins');
+    if (cardAdmins) {
+        cardAdmins.addEventListener('click', function() {
+            var sec = document.getElementById('adminsSection');
+            if (!sec) return;
+            var visible = sec.style.display !== 'none';
+            sec.style.display = visible ? 'none' : 'block';
+            if (!visible) {
+                cargarTablaAdmins();
+                sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    }
+    // Botón cerrar sección admins
+    var btnOcultar = document.getElementById('btnOcultarAdmins');
+    if (btnOcultar) {
+        btnOcultar.addEventListener('click', function() {
+            var sec = document.getElementById('adminsSection');
+            if (sec) sec.style.display = 'none';
+        });
+    }
+}
+
+function cargarTablaAdmins() {
+    // Cargar lista de admins registrados desde localStorage
+    var admins = JSON.parse(localStorage.getItem('adminsRegistrados') || '[]');
+    // También incluir el adminData del admin actual si existe
+    var adminData = JSON.parse(localStorage.getItem('adminData') || 'null');
+    if (adminData && adminData.nombreCompleto) {
+        var yaEsta = admins.some(function(a) { return a.usuario === adminData.usuario || a.correoInstitucional === adminData.correoInstitucional; });
+        if (!yaEsta) admins.unshift(adminData);
+    }
+
+    var num = document.getElementById('ustatAdmins');
+    if (num) num.textContent = admins.length || (adminData ? 1 : 0);
+
+    var table   = document.getElementById('adminsTable');
+    var body    = document.getElementById('adminsTableBody');
+    var noMsg   = document.getElementById('noAdminsMsg');
+    if (!body) return;
+    body.innerHTML = '';
+
+    if (admins.length === 0) {
+        if (table)  table.style.display  = 'none';
+        if (noMsg)  noMsg.style.display  = 'block';
+        return;
+    }
+    if (table)  table.style.display  = 'table';
+    if (noMsg)  noMsg.style.display  = 'none';
+
+    admins.forEach(function(a, i) {
+        var tr = document.createElement('tr');
+        var fechaReg = a.fecha ? (function(f){ var d=new Date(f); return isNaN(d)?f:d.toLocaleDateString('es-MX'); })(a.fecha) : '—';
+        tr.innerHTML = '<td>' + (i + 1) + '</td>' +
+            '<td>' + (a.nombreCompleto || '—') + '</td>' +
+            '<td><code>' + (a.usuario || 'admin') + '</code></td>' +
+            '<td>' + (a.correoInstitucional || '—') + '</td>' +
+            '<td>' + (a.areaDepartamento || '—') + '</td>' +
+            '<td><span class="task-badge badge-done">' + (a.rol || 'Administrador') + '</span></td>' +
+            '<td>' + fechaReg + '</td>';
+        body.appendChild(tr);
+    });
+}
+
+// Inicializar sección admins cuando se cargue el panel usuarios
+(function() {
+    var _origCargarPanel = window.navegarPanel;
+    // Hook en DOMContentLoaded para inicializar la sección
+    document.addEventListener('DOMContentLoaded', function() {
+        inicializarSeccionAdmins();
+        // Actualizar contador de admins al cargar
+        var admins = JSON.parse(localStorage.getItem('adminsRegistrados') || '[]');
+        var adminData = JSON.parse(localStorage.getItem('adminData') || 'null');
+        var total = admins.length || (adminData ? 1 : 0);
+        var num = document.getElementById('ustatAdmins');
+        if (num) num.textContent = total;
+    });
+})();
+
+// =============================================
+// SINCRONIZACIÓN DE VISITAS — MEJORADA
+// =============================================
+(function() {
+    // Registrar visita del admin al cargar
+    function registrarVisitaAdmin() {
+        var hoy = new Date().toDateString();
+        var ultimoDia = localStorage.getItem('ultimoDiaVisita');
+        if (ultimoDia !== hoy) {
+            localStorage.setItem('contadorVisitasHoy', '0');
+            localStorage.setItem('ultimoDiaVisita', hoy);
+        }
+        // Incrementar visitas totales
+        var total = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
+        localStorage.setItem('contadorVisitas', total + 1);
+        // Incrementar visitas hoy
+        var hoyCount = parseInt(localStorage.getItem('contadorVisitasHoy') || '0', 10);
+        localStorage.setItem('contadorVisitasHoy', hoyCount + 1);
+        // Historial diario (para la gráfica)
+        var dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+        var diaNombre = dias[new Date().getDay()];
+        var historial = JSON.parse(localStorage.getItem('historialVisitasDiarias') || '{}');
+        historial[diaNombre] = (parseInt(historial[diaNombre] || '0', 10) + 1);
+        localStorage.setItem('historialVisitasDiarias', JSON.stringify(historial));
+    }
+
+    // Sincronizar también con el servidor cuando esté disponible
+    function sincronizarVisitasConServidor() {
+        fetch('/api/visits').then(function(r) { return r.json(); }).then(function(v) {
+            var totalServidor = v.total || 0;
+            var hoyServidor   = v.hoy || 0;
+            // Usar el máximo entre servidor y localStorage (evita perder datos)
+            var totalLocal = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
+            var hoyLocal   = parseInt(localStorage.getItem('contadorVisitasHoy') || '0', 10);
+            var totalFinal = Math.max(totalServidor, totalLocal);
+            var hoyFinal   = Math.max(hoyServidor, hoyLocal);
+            // Actualizar KPIs en pantalla
+            var elTotal = document.getElementById('kpiVisitasTotales');
+            var elHoy   = document.getElementById('kpiVisitasHoy');
+            var elStat  = document.getElementById('statKpiVisitas');
+            if (elTotal) elTotal.textContent = totalFinal > 0 ? totalFinal.toLocaleString('es-MX') : '0';
+            if (elHoy)   elHoy.textContent   = hoyFinal   > 0 ? hoyFinal.toLocaleString('es-MX')   : '0';
+            if (elStat)  elStat.textContent  = totalFinal > 0 ? totalFinal.toLocaleString('es-MX') : '0';
+            var elResum = document.getElementById('resumVisitas');
+            if (elResum) elResum.textContent = totalFinal > 0 ? totalFinal + ' visita(s)' : 'Sin visitas aún';
+            var elAct = document.getElementById('actVisitas');
+            if (elAct) elAct.textContent = totalFinal + ' visita(s) registrada(s) en total.';
+        }).catch(function() {
+            // Sin servidor: usar localStorage
+            var total = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
+            var hoy   = parseInt(localStorage.getItem('contadorVisitasHoy') || '0', 10);
+            var elTotal = document.getElementById('kpiVisitasTotales');
+            var elHoy   = document.getElementById('kpiVisitasHoy');
+            if (elTotal) elTotal.textContent = total > 0 ? total.toLocaleString('es-MX') : '0';
+            if (elHoy)   elHoy.textContent   = hoy   > 0 ? hoy.toLocaleString('es-MX')   : '0';
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        registrarVisitaAdmin();
+        sincronizarVisitasConServidor();
+        // Re-sincronizar cada 30 segundos
+        setInterval(sincronizarVisitasConServidor, 30000);
+    });
+})();
