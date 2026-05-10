@@ -132,6 +132,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // ---- GESTIÓN DE USUARIOS ----
     inicializarGestionUsuarios();
 
+    // ---- SECCIÓN ADMINISTRADORES ----
+    inicializarSeccionAdmins();
+
     // ---- GESTIÓN DE DIRECTORIO ----
     inicializarGestionDirectorio();
 
@@ -539,12 +542,20 @@ function generarNotificaciones() {
         return;
     }
 
+    // Respetar última lectura: si ya se marcaron como leídas, no mostrar badge ni unread
+    var _ultimaLect = localStorage.getItem('notifUltimaLectura');
+
     notifList.innerHTML = notifs.map(function(n) {
-        return '<div class="notif-item unread"><i class="fas ' + n.icon + ' notif-icon" style="color:' + n.color + ';"></i>' +
+        var claseUnread = _ultimaLect ? '' : ' unread';
+        return '<div class="notif-item' + claseUnread + '"><i class="fas ' + n.icon + ' notif-icon" style="color:' + n.color + ';"></i>' +
             '<div class="notif-text"><strong>' + n.title + '</strong><span>' + n.sub + '</span><time>' + n.time + '</time></div></div>';
     }).join('');
 
-    if (notifBadge) { notifBadge.textContent = notifs.length; notifBadge.style.display = 'flex'; }
+    if (_ultimaLect) {
+        if (notifBadge) notifBadge.style.display = 'none';
+    } else {
+        if (notifBadge) { notifBadge.textContent = notifs.length; notifBadge.style.display = 'flex'; }
+    }
 }
 
 // =============================================
@@ -1666,20 +1677,6 @@ function cargarTablaAdmins() {
     });
 }
 
-// Inicializar sección admins cuando se cargue el panel usuarios
-(function() {
-    var _origCargarPanel = window.navegarPanel;
-    // Hook en DOMContentLoaded para inicializar la sección
-    document.addEventListener('DOMContentLoaded', function() {
-        inicializarSeccionAdmins();
-        // Actualizar contador de admins al cargar
-        var admins = JSON.parse(localStorage.getItem('adminsRegistrados') || '[]');
-        var adminData = JSON.parse(localStorage.getItem('adminData') || 'null');
-        var total = admins.length || (adminData ? 1 : 0);
-        var num = document.getElementById('ustatAdmins');
-        if (num) num.textContent = total;
-    });
-})();
 
 // =============================================
 // SINCRONIZACIÓN DE VISITAS — MEJORADA
