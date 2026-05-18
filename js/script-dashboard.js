@@ -837,6 +837,7 @@ function guardarContacto() {
     if (!areaSelect) { alert('El área es obligatoria.'); return; }
 
     // Cuando Área = Carreras, el área final es la carrera principal seleccionada
+    // Cuando Área = Personal, se guarda como "Personal" (contacto propio del alumno)
     var areaFinal = (areaSelect === 'Carreras') ? carreraSelect : areaSelect;
 
     // Mapa de colores por área/departamento/carrera
@@ -859,7 +860,8 @@ function guardarContacto() {
         'Licenciatura en Administración':          'rosa',
         'Ingeniería en Inteligencia Artificial':   'lima',
         'Ingeniería en Desarrollo de Aplicaciones':'granate',
-        'Posgrado':                                'oliva'
+        'Posgrado':                                'oliva',
+        'Personal':                                'gris'
     };
     var colorAsignado = colorPorArea[areaFinal] || 'azul';
 
@@ -887,8 +889,8 @@ function guardarContacto() {
         datos.id = nuevoId;
         datos.favorito = false;
         datos.archivado = false;
-        // Admin crea contactos institucionales; alumno crea contactos personales
-        datos.esInstitucional = (obtenerRol() === 'admin');
+        // Personal siempre es del alumno; de lo contrario depende del rol
+        datos.esInstitucional = (areaFinal === 'Personal') ? false : (obtenerRol() === 'admin');
         dirContactos.push(datos);
         dirContactoActual = datos;
         rellenarModal(datos, false);

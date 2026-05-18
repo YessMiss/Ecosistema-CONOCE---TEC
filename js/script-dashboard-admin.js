@@ -913,10 +913,34 @@ function guardarDir() {
         return;
     }
     var id = document.getElementById('modalDirId').value;
+    var areaSeleccionada = document.getElementById('dirArea').value;
+    // Mapa de colores por área — mismo que usa el dashboard del alumno
+    var colorPorAreaAdmin = {
+        'Administración':                          'naranja',
+        'Académico':                               'azul',
+        'Servicios':                               'verde',
+        'Coordinación':                            'rosa',
+        'Dirección':                               'morado',
+        'Dirección General':                       'indigo',
+        'Subdirección Académica':                  'cian',
+        'Subdirección de Planeación':              'teal',
+        'Ingeniería en Gestión Empresarial':       'naranja',
+        'Ingeniería Electromecánica':              'coral',
+        'Ingeniería en Sistemas Computacionales':  'indigo',
+        'Ingeniería Electrónica':                  'cian',
+        'Ingeniería Ambiental':                    'teal',
+        'Ingeniería Industrial':                   'amarillo',
+        'Ingeniería Química':                      'morado',
+        'Licenciatura en Administración':          'rosa',
+        'Ingeniería en Inteligencia Artificial':   'lima',
+        'Ingeniería en Desarrollo de Aplicaciones':'granate',
+        'Posgrado':                                'oliva'
+    };
+    var colorAdmin = colorPorAreaAdmin[areaSeleccionada] || 'azul';
     var nuevo = {
         id: id ? parseInt(id) : Date.now(),
         nombre: nombre, cargo: cargo.toUpperCase(), puesto: cargo,
-        area: document.getElementById('dirArea').value,
+        area: areaSeleccionada,
         correo: document.getElementById('dirCorreo').value.trim(),
         email:  document.getElementById('dirCorreo').value.trim(),
         celular: document.getElementById('dirTelefono').value.trim(),
@@ -924,7 +948,7 @@ function guardarDir() {
         especialidad: document.getElementById('dirEspecialidad').value.trim(),
         materias: document.getElementById('dirEspecialidad').value.split(',').map(function(m){return m.trim();}).filter(Boolean),
         esInstitucional: true, favorito: false, archivado: false,
-        color: 'azul'
+        color: colorAdmin
     };
 
     var contactos = JSON.parse(localStorage.getItem(DIRECTORIO_ADMIN_KEY) || '[]');

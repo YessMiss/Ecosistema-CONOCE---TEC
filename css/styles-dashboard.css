@@ -2793,6 +2793,7 @@ body {
 .dir-card-granate  .dir-card-top { background: #f0c8d8; }
 .dir-card-celeste  .dir-card-top { background: #c8e0f8; }
 .dir-card-oliva    .dir-card-top { background: #e0f0c0; }
+.dir-card-gris     .dir-card-top { background: #e8eaf0; }
 
 /* Badges */
 .dir-badge {
@@ -2817,6 +2818,7 @@ body {
 .dir-badge-granate  { background: #c82060; }
 .dir-badge-celeste  { background: #2888c8; }
 .dir-badge-oliva    { background: #7a9a20; }
+.dir-badge-gris     { background: #6b7a90; }
 
 .dir-star { font-size: 1.1rem; }
 .dir-star-gold { color: #f5c518; }
@@ -2854,6 +2856,7 @@ body {
 .dir-avatar-granate  { background: linear-gradient(135deg, #e04080, #900040); }
 .dir-avatar-celeste  { background: linear-gradient(135deg, #40a8e8, #105890); }
 .dir-avatar-oliva    { background: linear-gradient(135deg, #a0c030, #607010); }
+.dir-avatar-gris     { background: linear-gradient(135deg, #8a9ab0, #4a5568); }
 
 /* Info */
 .dir-card-info {
