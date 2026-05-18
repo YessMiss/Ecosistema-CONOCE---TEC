@@ -43,6 +43,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
     cargarDatosUsuario();
     configurarEventos();
+    // ── Restaurar sesión desde localStorage si sessionStorage está vacío (móvil/Vercel) ──
+    (function restaurarSesionAlumno() {
+        if (!sessionStorage.getItem('tipoUsuario')) {
+            var nombreLS = localStorage.getItem('nombreUsuarioActual') || localStorage.getItem('nombreAlumno') || '';
+            var correoLS = localStorage.getItem('correoUsuarioActual') || localStorage.getItem('correoAlumno') || '';
+            var rolLS    = localStorage.getItem('rolUsuarioActual') || 'alumno';
+            if (nombreLS) {
+                sessionStorage.setItem('tipoUsuario',   rolLS === 'admin' ? 'admin' : 'alumno');
+                sessionStorage.setItem('rolUsuario',    rolLS);
+                sessionStorage.setItem('nombreUsuario', nombreLS);
+                sessionStorage.setItem('usuarioActual', nombreLS);
+                if (correoLS) sessionStorage.setItem('correoUsuario', correoLS);
+                cargarDatosUsuario();
+            }
+        }
+    })();
+
+    // ── Bottom nav móvil: sincronizar con cambiarSeccion ──
+    (function conectarBottomNav() {
+        var bnItems = document.querySelectorAll('.ctec-bn-item[data-section]');
+        bnItems.forEach(function(item) {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                var sec = this.getAttribute('data-section');
+                if (sec) cambiarSeccion(sec);
+            });
+        });
+    })();
 
     // Sidebar removido - navegación horizontal en header
 
@@ -143,6 +171,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        // Sincronizar bottom nav móvil (ctec-bn-item)
+        document.querySelectorAll('.ctec-bn-item[data-section]').forEach(function(item) {
+            item.classList.remove('active');
+            if (item.getAttribute('data-section') === sectionName) item.classList.add('active');
+        });
+
         // Mostrar/ocultar secciones
         sections.forEach(section => {
             section.classList.remove('active');
@@ -211,6 +245,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (item.getAttribute('data-section') === sectionName) item.classList.add('active');
         });
         navBottomItems.forEach(item => {
+            item.classList.remove('active');
+            if (item.getAttribute('data-section') === sectionName) item.classList.add('active');
+        });
+        // Sincronizar bottom nav móvil
+        document.querySelectorAll('.ctec-bn-item[data-section]').forEach(function(item) {
             item.classList.remove('active');
             if (item.getAttribute('data-section') === sectionName) item.classList.add('active');
         });
@@ -308,6 +347,15 @@ document.addEventListener('DOMContentLoaded', function() {
                              localStorage.getItem('nombreAlumno') || 
                              'Juan Pérez';
         
+        // Persistir en localStorage para recuperación en móvil
+        if (nombreUsuario && nombreUsuario !== 'Juan Pérez') {
+            localStorage.setItem('nombreUsuarioActual', nombreUsuario);
+            var rolActual = sessionStorage.getItem('rolUsuario') || 'alumno';
+            localStorage.setItem('rolUsuarioActual', rolActual);
+            var correoActual = sessionStorage.getItem('correoUsuario') || '';
+            if (correoActual) localStorage.setItem('correoUsuarioActual', correoActual);
+        }
+
         // Primer nombre para saludo y rol
         const primerNombre = nombreUsuario.split(' ')[0];
 

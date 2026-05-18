@@ -4822,3 +4822,175 @@ body {
 .dir-form-group select {
     cursor: pointer;
 }
+
+/* =====================================================
+   BOTTOM NAV MÓVIL — ALUMNO (ctec-bottom-nav)
+   ===================================================== */
+.ctec-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    background: #fff;
+    border-top: 1.5px solid #e2e8f0;
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.10);
+    flex-direction: row;
+    align-items: stretch;
+    height: 60px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.ctec-bn-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 6px 4px;
+    transition: color 0.18s, background 0.18s;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+}
+
+.ctec-bn-item i {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.ctec-bn-item span {
+    font-size: 9.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.ctec-bn-item.active {
+    color: var(--color-primary, #1a3a6b);
+    background: rgba(26,58,107,0.06);
+    border-top: 2.5px solid var(--color-primary, #1a3a6b);
+}
+
+.ctec-bn-item:hover {
+    color: var(--color-primary, #1a3a6b);
+    background: rgba(26,58,107,0.04);
+}
+
+@media (max-width: 768px) {
+    .ctec-bottom-nav {
+        display: flex;
+    }
+
+    .main-content {
+        padding-bottom: 68px !important;
+    }
+
+    /* Ocultar nav central del header en móvil — reemplazado por bottom nav */
+    .header-nav {
+        display: none !important;
+    }
+
+    .header-dashboard {
+        height: 52px;
+        padding: 0 14px;
+    }
+
+    .header-content {
+        gap: 10px;
+    }
+
+    .logo-itm-img {
+        width: 36px;
+        height: 36px;
+    }
+
+    .header-inst {
+        font-size: 9.5px;
+    }
+
+    .header-user-pill {
+        padding: 4px 8px 4px 4px;
+        gap: 6px;
+    }
+
+    .header-user-pill .header-user-info,
+    .user-chevron {
+        display: none;
+    }
+
+    .user-avatar-img {
+        width: 32px;
+        height: 32px;
+    }
+
+    .section-mapa,
+    .section-placeholder {
+        padding: 12px 14px;
+        gap: 14px;
+    }
+
+    .dir-table-wrap,
+    .users-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .dir-modal-card,
+    .ig-modal-card,
+    .tr-modal-card {
+        width: 96vw !important;
+        max-width: 96vw !important;
+        max-height: 88vh !important;
+        margin: 6vh auto 0 !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .ctec-bn-item span {
+        font-size: 8.5px;
+    }
+
+    .ctec-bn-item i {
+        font-size: 18px;
+    }
+
+    .header-dashboard {
+        height: 48px;
+        padding: 0 10px;
+    }
+
+    .logo-itm-img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .header-inst {
+        font-size: 8.5px;
+    }
+
+    .header-text {
+        display: none;
+    }
+}
+
+body.dark-mode .ctec-bottom-nav {
+    background: #1e293b;
+    border-top-color: #334155;
+}
+
+body.dark-mode .ctec-bn-item {
+    color: #64748b;
+}
+
+body.dark-mode .ctec-bn-item.active {
+    color: #93c5fd;
+    background: rgba(147,197,253,0.08);
+    border-top-color: #93c5fd;
+}

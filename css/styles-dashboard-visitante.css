@@ -1156,3 +1156,188 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--color-primary);
 }
+
+/* =====================================================
+   BOTTOM NAV MÓVIL — VISITANTE (ctec-bottom-nav)
+   ===================================================== */
+.ctec-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    background: #fff;
+    border-top: 1.5px solid #e2e8f0;
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.10);
+    flex-direction: row;
+    align-items: stretch;
+    height: 60px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.ctec-bn-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 6px 4px;
+    transition: color 0.18s, background 0.18s;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+}
+
+.ctec-bn-item i {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.ctec-bn-item span {
+    font-size: 9.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.ctec-bn-item.active {
+    color: var(--color-primary, #1a3a6b);
+    background: rgba(26,58,107,0.06);
+    border-top: 2.5px solid var(--color-primary, #1a3a6b);
+}
+
+.ctec-bn-item:hover {
+    color: var(--color-primary, #1a3a6b);
+    background: rgba(26,58,107,0.04);
+}
+
+@media (max-width: 768px) {
+    .ctec-bottom-nav {
+        display: flex;
+    }
+
+    /* Compensar altura del bottom nav */
+    .main-content {
+        padding-bottom: 68px !important;
+    }
+
+    /* Header compacto */
+    .header-dashboard {
+        height: 52px;
+    }
+
+    .header-content {
+        padding: 0 12px;
+        gap: 10px;
+    }
+
+    /* Sidebar: slide desde la izquierda, debajo del header */
+    .sidebar {
+        position: fixed !important;
+        left: -300px !important;
+        top: 52px !important;
+        height: calc(100vh - 52px - 60px) !important;
+        width: 280px !important;
+        z-index: 190 !important;
+        transition: left 0.28s cubic-bezier(.4,0,.2,1) !important;
+        box-shadow: 4px 0 20px rgba(0,0,0,0.18);
+        overflow-y: auto;
+    }
+
+    .sidebar.active {
+        left: 0 !important;
+    }
+
+    /* Overlay oscuro cuando sidebar está abierto */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 189;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    /* Ocultar la barra inferior original si existe */
+    .bottom-nav {
+        display: none !important;
+    }
+
+    /* Botón hamburguesa visible en móvil */
+    .btn-menu-toggle {
+        display: flex !important;
+        width: 38px;
+        height: 38px;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.12);
+        border: 1.5px solid rgba(255,255,255,0.25);
+        border-radius: 8px;
+        color: #fff;
+        font-size: 18px;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    /* Modales: ancho completo */
+    .ig-modal-card,
+    .tr-modal-card {
+        width: 96vw !important;
+        max-width: 96vw !important;
+        max-height: 88vh !important;
+        margin: 6vh auto 0 !important;
+    }
+
+    /* Servicios grid: 1 columna */
+    .servicios-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Texto del botón salir: ocultar en móvil muy pequeño */
+    .btn-logout-visitante span {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .ctec-bn-item span {
+        font-size: 8.5px;
+    }
+
+    .ctec-bn-item i {
+        font-size: 18px;
+    }
+
+    .header-text h1 {
+        font-size: 13px;
+    }
+
+    .header-text p {
+        display: none;
+    }
+}
+
+/* Dark mode */
+body.dark-mode .ctec-bottom-nav {
+    background: #1e293b;
+    border-top-color: #334155;
+}
+
+body.dark-mode .ctec-bn-item {
+    color: #64748b;
+}
+
+body.dark-mode .ctec-bn-item.active {
+    color: #93c5fd;
+    background: rgba(147,197,253,0.08);
+    border-top-color: #93c5fd;
+}

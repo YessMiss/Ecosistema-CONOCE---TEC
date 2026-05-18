@@ -66,6 +66,19 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.innerWidth <= 768) {
             // Móvil: slide desde la izquierda
             sidebar.classList.toggle('active');
+            // Overlay
+            var overlay = document.getElementById('sidebarOverlayV');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'sidebarOverlayV';
+                overlay.className = 'sidebar-overlay';
+                document.body.appendChild(overlay);
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            }
+            overlay.classList.toggle('active', sidebar.classList.contains('active'));
         } else {
             // Desktop: colapsar/expandir (arranca colapsado)
             mainContainer.classList.toggle('sidebar-collapsed');
@@ -80,6 +93,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     btnCloseSidebar.addEventListener('click', function() {
         sidebar.classList.remove('active');
+        var overlay = document.getElementById('sidebarOverlayV');
+        if (overlay) overlay.classList.remove('active');
     });
 
     // Cerrar sidebar al hacer clic fuera (solo móvil)
@@ -87,6 +102,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (window.innerWidth <= 768) {
             if (!sidebar.contains(e.target) && !btnMenuToggle.contains(e.target)) {
                 sidebar.classList.remove('active');
+                var overlay = document.getElementById('sidebarOverlayV');
+                if (overlay) overlay.classList.remove('active');
             }
         }
     });
@@ -188,6 +205,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        // Sincronizar bottom nav móvil
+        document.querySelectorAll('.ctec-bn-item[data-section]').forEach(function(item) {
+            item.classList.remove('active');
+            if (item.getAttribute('data-section') === sectionName) item.classList.add('active');
+        });
+
         // Mostrar/ocultar secciones
         sections.forEach(section => {
             section.classList.remove('active');
@@ -239,6 +262,11 @@ document.addEventListener('DOMContentLoaded', function() {
             item.classList.remove('active');
             if (item.getAttribute('data-section') === seccion) item.classList.add('active');
         });
+        // Sincronizar bottom nav móvil en popstate
+        document.querySelectorAll('.ctec-bn-item[data-section]').forEach(function(item) {
+            item.classList.remove('active');
+            if (item.getAttribute('data-section') === seccion) item.classList.add('active');
+        });
         sections.forEach(function(section) { section.classList.remove('active'); });
         var sid = 'section' + seccion.charAt(0).toUpperCase() + seccion.slice(1);
         if (seccion === 'inicio') sid = 'sectionInicio';
@@ -247,6 +275,15 @@ document.addEventListener('DOMContentLoaded', function() {
         else if (seccion === 'soporte') sid = 'sectionSoporte';
         var el = document.getElementById(sid);
         if (el) { el.style.display = ''; el.classList.add('active'); }
+    });
+
+    // ── Bottom nav móvil visitante: conectar clics ──
+    document.querySelectorAll('#ctecBottomNavV .ctec-bn-item[data-section]').forEach(function(item) {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            var sec = this.getAttribute('data-section');
+            if (sec) cambiarSeccion(sec);
+        });
     });
 
     // Lógica del carrusel removida - reemplazada por banner estático e información institucional
