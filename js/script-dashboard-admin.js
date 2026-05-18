@@ -1035,6 +1035,9 @@ function guardarDir() {
         contactos.push(nuevo);
     }
     localStorage.setItem(DIRECTORIO_ADMIN_KEY, JSON.stringify(contactos));
+    // Sincronizar con servidor para que sea visible en móvil y otros dispositivos
+    fetch('/api/contacts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(contactos) })
+        .catch(function(e) { console.warn('No se pudo sincronizar directorio con servidor:', e); });
     // ── Sincronizar con la clave del alumno ────────────────────────────────
     sincronizarDirectorioAlumno(contactos);
     cerrarModalDir();
@@ -1048,6 +1051,9 @@ function eliminarDir(idContacto) {
     var contactos = JSON.parse(localStorage.getItem(DIRECTORIO_ADMIN_KEY) || '[]');
     contactos = contactos.filter(function(c){ return c.id !== idContacto && c.id !== String(idContacto); });
     localStorage.setItem(DIRECTORIO_ADMIN_KEY, JSON.stringify(contactos));
+    // Sincronizar con servidor
+    fetch('/api/contacts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(contactos) })
+        .catch(function(e) { console.warn('No se pudo sincronizar directorio con servidor:', e); });
     // ── Sincronizar con la clave del alumno ────────────────────────────────
     sincronizarDirectorioAlumno(contactos);
     cargarTablaDirectorio();

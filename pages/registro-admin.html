@@ -343,6 +343,12 @@
             localStorage.setItem('adminUsuario', usuario);
             localStorage.setItem('adminPassword', pass);
             localStorage.setItem('nombreUsuarioActual', nombre);
+            // Guardar credenciales en servidor para acceso desde otros dispositivos (móvil)
+            fetch('/api/users/admin', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ nombre: nombre, nombreCompleto: nombre, correo: correo, usuario: usuario, password: pass, area: area, rol: rol, fecha: new Date().toISOString() })
+            }).catch(function(e) { console.warn('No se pudo sincronizar admin con servidor:', e); });
             var adminsArr = JSON.parse(localStorage.getItem('adminsRegistrados') || '[]');
             adminsArr.push({ nombre: nombre, correo: correo, numEmpleado: numEmp, area: area, rol: rol, fecha: new Date().toISOString() });
             localStorage.setItem('adminsRegistrados', JSON.stringify(adminsArr));

@@ -4994,3 +4994,65 @@ body.dark-mode .ctec-bn-item.active {
     background: rgba(147,197,253,0.08);
     border-top-color: #93c5fd;
 }
+
+/* =====================================================
+   FIX BANNER BIENVENIDA EN MÓVIL
+   ===================================================== */
+@media (max-width: 768px) {
+    .welcome-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px 18px 0 18px;
+        min-height: unset;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .welcome-banner-text {
+        padding-bottom: 16px;
+        width: 100%;
+    }
+
+    .welcome-title {
+        font-size: 1.25rem;
+    }
+
+    .welcome-subtitle {
+        font-size: 0.8rem;
+    }
+
+    .welcome-banner-img {
+        align-self: flex-end;
+        height: 110px;
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-end;
+    }
+
+    .welcome-img {
+        height: 110px;
+        max-width: 55%;
+        object-fit: contain;
+        object-position: bottom right;
+    }
+}
+
+@media (max-width: 480px) {
+    .welcome-banner {
+        padding: 16px 14px 0 14px;
+    }
+
+    .welcome-title {
+        font-size: 1.1rem;
+    }
+
+    .welcome-banner-img {
+        height: 90px;
+    }
+
+    .welcome-img {
+        height: 90px;
+        max-width: 50%;
+    }
+}

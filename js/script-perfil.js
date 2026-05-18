@@ -25,6 +25,35 @@ document.addEventListener('DOMContentLoaded', function() {
     cargarDatosUsuario();
     configurarEventos();
 
+    // ── Cargar datos desde servidor si localStorage está vacío (móvil) ──
+    if (correo) {
+        var numCtrlEl = document.getElementById('infoMatricula');
+        var sinDatos = !numCtrlEl || numCtrlEl.textContent === '—' || numCtrlEl.textContent === '';
+        if (sinDatos) {
+            fetch('/api/users')
+                .then(function(r) { return r.json(); })
+                .then(function(u) {
+                    var alumnoSrv = (u.alumnos || []).find(function(a) { return a.correo === correo || a.email === correo; });
+                    if (alumnoSrv) {
+                        // Restaurar en localStorage para futuras cargas
+                        var perfilExistente = {};
+                        try { perfilExistente = JSON.parse(localStorage.getItem('perfil_' + correo) || '{}'); } catch(e) {}
+                        var perfilActualizado = Object.assign({ nombre: alumnoSrv.nombre || '', correo: correo, numControl: alumnoSrv.numControl || '', carrera: alumnoSrv.carrera || '', semestre: alumnoSrv.semestre || '' }, perfilExistente);
+                        if (!perfilExistente.nombre) perfilActualizado.nombre = alumnoSrv.nombre || '';
+                        if (!perfilExistente.numControl) perfilActualizado.numControl = alumnoSrv.numControl || '';
+                        if (!perfilExistente.carrera) perfilActualizado.carrera = alumnoSrv.carrera || '';
+                        localStorage.setItem('perfil_' + correo, JSON.stringify(perfilActualizado));
+                        // También guardar en alumnosRegistrados si no está
+                        var alumnosLS = JSON.parse(localStorage.getItem('alumnosRegistrados') || '[]');
+                        var existe = alumnosLS.find(function(a) { return (a.correo || a.email) === correo; });
+                        if (!existe) { alumnosLS.push(alumnoSrv); localStorage.setItem('alumnosRegistrados', JSON.stringify(alumnosLS)); }
+                        cargarDatosUsuario();
+                    }
+                })
+                .catch(function() {});
+        }
+    }
+
     // Escuchar si el admin cambia el permiso de perfil en tiempo real
     window.addEventListener('storage', function(e) {
         if (correo && e.key === 'perfilPermitido_' + correo) {

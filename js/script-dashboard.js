@@ -565,53 +565,54 @@ function inicializarSidebarDirectorio() {
 }
 
 function inicializarDirectorio() {
-    // ── Cargar contactos institucionales que admin haya guardado ──────────
-    var adminKey   = 'contactosTECAdmin';
-    var alumnoKey  = 'conoce_tec_directorio';
-    var adminInst  = JSON.parse(localStorage.getItem(adminKey)  || '[]');
-    var guardados  = JSON.parse(localStorage.getItem(alumnoKey) || 'null');
+    var adminKey  = 'contactosTECAdmin';
+    var alumnoKey = 'conoce_tec_directorio';
+    var adminInst = JSON.parse(localStorage.getItem(adminKey)  || '[]');
+    var guardados = JSON.parse(localStorage.getItem(alumnoKey) || 'null');
 
-    if (guardados) {
-        // Migrar datos viejos: contactos sin esInstitucional se marcan como institucionales
-        guardados = guardados.map(function(c) {
-            if (c.esInstitucional === undefined || c.esInstitucional === null) {
-                c.esInstitucional = true;
-            }
-            return c;
-        });
-
-        // Fusionar: reemplazar/agregar los institucionales que el admin tenga en su clave
-        if (adminInst.length > 0) {
-            // Quitar los institucionales viejos y reemplazar con los del admin
-            var personales = guardados.filter(function(c) { return !c.esInstitucional; });
-            // Asegurar esInstitucional: true en los del admin
-            var institucionalesAdmin = adminInst.map(function(c) {
-                c.esInstitucional = true;
+    function _aplicarContactos(instArr, guardadosArr) {
+        if (guardadosArr) {
+            guardadosArr = guardadosArr.map(function(c) {
+                if (c.esInstitucional === undefined || c.esInstitucional === null) c.esInstitucional = true;
                 return c;
             });
-            dirContactos = institucionalesAdmin.concat(personales);
+            if (instArr.length > 0) {
+                var personales = guardadosArr.filter(function(c) { return !c.esInstitucional; });
+                var inst = instArr.map(function(c) { c.esInstitucional = true; return c; });
+                dirContactos = inst.concat(personales);
+            } else {
+                dirContactos = guardadosArr;
+            }
         } else {
-            dirContactos = guardados;
+            if (instArr.length > 0) {
+                dirContactos = instArr.map(function(c) { c.esInstitucional = true; return c; });
+            } else {
+                dirContactos = [];
+            }
         }
         guardarDirectorio();
         actualizarContadoresDirectorio();
-    } else {
-        // Sin datos previos: usar institucionales del admin o los predeterminados
-        if (adminInst.length > 0) {
-            dirContactos = adminInst.map(function(c) { c.esInstitucional = true; return c; });
-        } else {
-            dirContactos = [
-                { id: 1, nombre: 'Lic. Pedro Méndez', cargo: 'ADMINISTRADOR GENERAL', area: 'Administración', color: 'naranja', favorito: true, archivado: false, esInstitucional: true },
-                { id: 2, nombre: 'Lic. Sandra Rivas', cargo: 'COORDINADORA DE SECRETARÍA', area: 'Administración', color: 'naranja', favorito: false, archivado: false, esInstitucional: true },
-                { id: 3, nombre: 'Dra. Carolina León', cargo: 'PROFESORA DE QUÍMICA', area: 'Académico', color: 'azul', favorito: true, archivado: false, esInstitucional: true },
-                { id: 4, nombre: 'Ing. Daniel Salinas', cargo: 'COORDINADOR DE MANTENIMIENTO', area: 'Servicios', color: 'verde', favorito: false, archivado: false, esInstitucional: true },
-                { id: 5, nombre: 'Mariana Torres', cargo: 'RESPONSABLE DEL SERVICIO MÉDICO', area: 'Servicios', color: 'verde', favorito: false, archivado: false, esInstitucional: true },
-                { id: 6, nombre: 'Lic. Javier Román', cargo: 'DIRECTOR DE COMUNICACIÓN', area: 'Comunicación', color: 'rosa', favorito: false, archivado: false, esInstitucional: true }
-            ];
-        }
-        guardarDirectorio();
+        renderizarDirectorio();
     }
-    renderizarDirectorio();
+
+    // Siempre consultar el servidor para obtener contactos institucionales actualizados
+    // (funciona en móvil aunque el localStorage esté vacío)
+    fetch('/api/contacts')
+        .then(function(r) { return r.json(); })
+        .then(function(serverContacts) {
+            if (serverContacts && serverContacts.length > 0) {
+                // Actualizar localStorage con los del servidor
+                localStorage.setItem(adminKey, JSON.stringify(serverContacts));
+                _aplicarContactos(serverContacts, guardados);
+            } else {
+                // Servidor sin contactos → usar localStorage
+                _aplicarContactos(adminInst, guardados);
+            }
+        })
+        .catch(function() {
+            // Sin servidor: usar localStorage
+            _aplicarContactos(adminInst, guardados);
+        });
 }
 
 function guardarDirectorio() {
@@ -1037,37 +1038,62 @@ document.addEventListener('DOMContentLoaded', function() {
     // Incrementar solo una vez por sesión de pestaña
     var visitaContada = sessionStorage.getItem('visitaContada');
     if (!visitaContada) {
-        var visitas = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
-        visitas += 1;
-        localStorage.setItem('contadorVisitas', visitas);
         sessionStorage.setItem('visitaContada', 'true');
 
-        // Visitas hoy
-        var hoy = new Date().toDateString();
-        if (localStorage.getItem('ultimoDiaVisita') !== hoy) {
-            localStorage.setItem('contadorVisitasHoy', '0');
-            localStorage.setItem('ultimoDiaVisita', hoy);
-        }
-        var hoyCount = parseInt(localStorage.getItem('contadorVisitasHoy') || '0', 10);
-        localStorage.setItem('contadorVisitasHoy', hoyCount + 1);
-
-        // Historial diario para la gráfica del admin
-        var dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-        var diaNombre = dias[new Date().getDay()];
-        var historial = JSON.parse(localStorage.getItem('historialVisitasDiarias') || '{}');
-        historial[diaNombre] = (parseInt(historial[diaNombre] || '0', 10) + 1);
-        localStorage.setItem('historialVisitasDiarias', JSON.stringify(historial));
+        // Registrar visita en servidor (fuente de verdad compartida entre dispositivos)
+        fetch('/api/visits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+            .then(function(r) { return r.json(); })
+            .then(function(v) {
+                localStorage.setItem('contadorVisitas', v.total || 0);
+                localStorage.setItem('contadorVisitasHoy', v.hoy || 0);
+                actualizarContadores();
+                // Historial diario para la gráfica del admin
+                var dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+                var diaNombre = dias[new Date().getDay()];
+                var historial = JSON.parse(localStorage.getItem('historialVisitasDiarias') || '{}');
+                historial[diaNombre] = (parseInt(historial[diaNombre] || '0', 10) + 1);
+                localStorage.setItem('historialVisitasDiarias', JSON.stringify(historial));
+            })
+            .catch(function() {
+                // Sin servidor: usar localStorage como fallback
+                var visitas = parseInt(localStorage.getItem('contadorVisitas') || '0', 10) + 1;
+                localStorage.setItem('contadorVisitas', visitas);
+                var hoy = new Date().toDateString();
+                if (localStorage.getItem('ultimoDiaVisita') !== hoy) { localStorage.setItem('contadorVisitasHoy', '0'); localStorage.setItem('ultimoDiaVisita', hoy); }
+                var hoyCount = parseInt(localStorage.getItem('contadorVisitasHoy') || '0', 10) + 1;
+                localStorage.setItem('contadorVisitasHoy', hoyCount);
+                actualizarContadores();
+            });
     }
 
     function actualizarContadores() {
-        var visitas = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
-        var registrados = parseInt(localStorage.getItem('contadorRegistrados') || '0', 10);
-
-        var elVisitas = document.getElementById('footerVisitas');
-        var elRegistrados = document.getElementById('footerRegistrados');
-
-        if (elVisitas) elVisitas.textContent = visitas.toLocaleString('es-MX');
-        if (elRegistrados) elRegistrados.textContent = registrados.toLocaleString('es-MX');
+        // Leer del servidor para tener siempre el valor real
+        fetch('/api/visits')
+            .then(function(r) { return r.json(); })
+            .then(function(v) {
+                var visitas = v.total || parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
+                localStorage.setItem('contadorVisitas', visitas);
+                var elVisitas = document.getElementById('footerVisitas');
+                if (elVisitas) elVisitas.textContent = visitas.toLocaleString('es-MX');
+            }).catch(function() {
+                var visitas = parseInt(localStorage.getItem('contadorVisitas') || '0', 10);
+                var elVisitas = document.getElementById('footerVisitas');
+                if (elVisitas) elVisitas.textContent = visitas.toLocaleString('es-MX');
+            });
+        // Registrados: leer del servidor
+        fetch('/api/users')
+            .then(function(r) { return r.json(); })
+            .then(function(u) {
+                var reg = (u.alumnos || []).length;
+                if (reg > 0) localStorage.setItem('contadorRegistrados', reg);
+                else reg = parseInt(localStorage.getItem('contadorRegistrados') || '0', 10);
+                var elReg = document.getElementById('footerRegistrados');
+                if (elReg) elReg.textContent = reg.toLocaleString('es-MX');
+            }).catch(function() {
+                var reg = parseInt(localStorage.getItem('contadorRegistrados') || '0', 10);
+                var elReg = document.getElementById('footerRegistrados');
+                if (elReg) elReg.textContent = reg.toLocaleString('es-MX');
+            });
     }
 
     // Actualizar al cargar (esperar DOM)

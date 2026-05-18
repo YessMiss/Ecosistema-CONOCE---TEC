@@ -27,12 +27,14 @@ const REPORTS_FILE = path.join(ROOT, 'map', 'data', 'reports.json');
 const VISITS_FILE  = path.join(ROOT, 'data', 'visits.json');
 const USERS_FILE   = path.join(ROOT, 'data', 'users.json');
 const CAFETERIA_FILE = path.join(ROOT, 'data', 'cafeteria_visits.json');
+const CONTACTS_FILE  = path.join(ROOT, 'data', 'contacts.json');
 
 // En memoria (respaldo para Vercel)
 let reportsMemory = [];
 let visitsMemory  = { total: 0, hoy: 0, fecha: '' };
 let usersMemory   = { alumnos: [], admins: [], visitantes: 0 };
 let cafeteriaMemory = { total: 0, hoy: 0, fecha: '' };
+let contactsMemory  = [];
 
 // ─────────────────────────────────────────────────────
 //  Middleware
@@ -67,6 +69,9 @@ if (!IS_VERCEL) {
 
   if (!fs.existsSync(CAFETERIA_FILE)) fs.writeFileSync(CAFETERIA_FILE, JSON.stringify(cafeteriaMemory), 'utf-8');
   try { cafeteriaMemory = JSON.parse(fs.readFileSync(CAFETERIA_FILE, 'utf-8')); } catch { cafeteriaMemory = { total: 0, hoy: 0, fecha: '' }; }
+
+  if (!fs.existsSync(CONTACTS_FILE)) fs.writeFileSync(CONTACTS_FILE, '[]', 'utf-8');
+  try { contactsMemory = JSON.parse(fs.readFileSync(CONTACTS_FILE, 'utf-8')); } catch { contactsMemory = []; }
 }
 
 // ─────────────────────────────────────────────────────
@@ -248,6 +253,49 @@ app.post('/api/visits', (req, res) => {
     v.total += 1;
     v.hoy   += 1;
     guardarVisitas(v, () => res.json(v));
+  });
+});
+
+// ─────────────────────────────────────────────────────
+//  API — Directorio de contactos institucionales
+// ─────────────────────────────────────────────────────
+
+// GET /api/contacts → obtener contactos institucionales
+app.get('/api/contacts', (req, res) => {
+  if (IS_VERCEL) return res.json(contactsMemory);
+  fs.readFile(CONTACTS_FILE, 'utf-8', (err, data) => {
+    try { res.json(JSON.parse(data)); } catch { res.json([]); }
+  });
+});
+
+// POST /api/contacts → guardar/reemplazar lista de contactos
+app.post('/api/contacts', (req, res) => {
+  const lista = req.body;
+  if (!Array.isArray(lista)) return res.status(400).json({ error: 'Se esperaba un array' });
+  contactsMemory = lista;
+  if (IS_VERCEL) return res.json({ ok: true, total: lista.length });
+  fs.writeFile(CONTACTS_FILE, JSON.stringify(lista, null, 2), 'utf-8', (err) => {
+    if (err) return res.status(500).json({ error: 'Error al guardar contactos' });
+    res.json({ ok: true, total: lista.length });
+  });
+});
+
+// ─────────────────────────────────────────────────────
+//  API — Credenciales de administradores (para login móvil)
+// ─────────────────────────────────────────────────────
+
+// POST /api/users/admin → registrar admin (también guarda credenciales)
+// GET /api/users/admin/check → verificar credenciales de admin
+app.get('/api/users/admin/check', (req, res) => {
+  const { usuario, password } = req.query;
+  if (!usuario || !password) return res.status(400).json({ ok: false });
+  leerUsuarios((err, u) => {
+    const admin = (u.admins || []).find(a => a.usuario === usuario && a.password === password);
+    if (admin) {
+      res.json({ ok: true, nombre: admin.nombre || admin.nombreCompleto || usuario });
+    } else {
+      res.json({ ok: false });
+    }
   });
 });
 

@@ -455,16 +455,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const password = document.getElementById('passwordAdmin').value.trim();
             const errDiv   = document.getElementById('adminLoginError');
 
-            // Verificar credenciales: primero admin registrado, luego fallback
-            const adminUsuarioGuardado   = localStorage.getItem('adminUsuario');
-            const adminPasswordGuardado  = localStorage.getItem('adminPassword');
-            const adminDataStr           = localStorage.getItem('adminData');
+            const adminUsuarioGuardado  = localStorage.getItem('adminUsuario');
+            const adminPasswordGuardado = localStorage.getItem('adminPassword');
+            const adminDataStr          = localStorage.getItem('adminData');
 
             let credencialesOK = false;
             let nombreAdmin = 'Administrador';
 
             if (adminUsuarioGuardado && adminPasswordGuardado) {
-                // Admin registrado existe
                 if (usuario === adminUsuarioGuardado && password === adminPasswordGuardado) {
                     credencialesOK = true;
                     if (adminDataStr) {
@@ -476,41 +474,67 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            // Fallback a credenciales estáticas (admin/conocetec2024)
-            // Con estas credenciales genéricas el nombre siempre es "Administrador"
+            // Fallback a credenciales estáticas
             if (!credencialesOK && usuario === ADMIN_USUARIO_FALLBACK && password === ADMIN_PASSWORD_FALLBACK) {
                 credencialesOK = true;
-                nombreAdmin = 'Administrador'; // Nunca tomar nombre de otro usuario
+                nombreAdmin = 'Administrador';
             }
 
             if (credencialesOK) {
-                errDiv.style.display = 'none';
-                // Guardar sesión con rol admin y nombre real
-                sessionStorage.setItem('tipoUsuario',  'admin');
-                sessionStorage.setItem('rolUsuario',   'admin');
-                sessionStorage.setItem('usuarioActual', usuario);
-                sessionStorage.setItem('nombreUsuario', nombreAdmin);
-                sessionStorage.setItem('horaLogin', new Date().toLocaleTimeString());
-                // Solo sobreescribir localStorage si es un admin registrado (no genérico)
-                if (nombreAdmin !== 'Administrador') {
-                    localStorage.setItem('nombreUsuarioActual', nombreAdmin);
-                }
-
-                // Cerrar modal y redirigir al DASHBOARD DE ADMIN
-                const modalAdminEl = document.getElementById('modalAdmin');
-                const m = bootstrap.Modal.getInstance(modalAdminEl);
-                if (m) m.hide();
-
-                mostrarAlerta('¡Bienvenido, ' + nombreAdmin.split(' ')[0] + '!', 'success');
-                setTimeout(function() {
-                    window.location.href = 'pages/dashboard-admin.html';
-                }, 1200);
+                _completarLoginAdmin(usuario, password, nombreAdmin);
             } else {
-                errDiv.style.display = 'block';
-                document.getElementById('passwordAdmin').value = '';
-                document.getElementById('passwordAdmin').focus();
+                // No encontrado en localStorage → verificar en servidor (soporte para móvil)
+                errDiv.style.display = 'none';
+                var btnOrig = btnConfirmarAdmin.innerHTML;
+                btnConfirmarAdmin.disabled = true;
+                btnConfirmarAdmin.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Verificando...';
+                fetch('/api/users/admin/check?usuario=' + encodeURIComponent(usuario) + '&password=' + encodeURIComponent(password))
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        btnConfirmarAdmin.disabled = false;
+                        btnConfirmarAdmin.innerHTML = btnOrig;
+                        if (data.ok) {
+                            localStorage.setItem('adminUsuario', usuario);
+                            localStorage.setItem('adminPassword', password);
+                            if (data.nombre && data.nombre !== 'Administrador') {
+                                localStorage.setItem('nombreUsuarioActual', data.nombre);
+                            }
+                            _completarLoginAdmin(usuario, password, data.nombre || usuario);
+                        } else {
+                            errDiv.style.display = 'block';
+                            document.getElementById('passwordAdmin').value = '';
+                            document.getElementById('passwordAdmin').focus();
+                        }
+                    })
+                    .catch(function() {
+                        btnConfirmarAdmin.disabled = false;
+                        btnConfirmarAdmin.innerHTML = btnOrig;
+                        errDiv.style.display = 'block';
+                        document.getElementById('passwordAdmin').value = '';
+                        document.getElementById('passwordAdmin').focus();
+                    });
             }
         });
+    }
+
+    function _completarLoginAdmin(usuario, password, nombreAdmin) {
+        var errDiv = document.getElementById('adminLoginError');
+        errDiv.style.display = 'none';
+        sessionStorage.setItem('tipoUsuario',  'admin');
+        sessionStorage.setItem('rolUsuario',   'admin');
+        sessionStorage.setItem('usuarioActual', usuario);
+        sessionStorage.setItem('nombreUsuario', nombreAdmin);
+        sessionStorage.setItem('horaLogin', new Date().toLocaleTimeString());
+        if (nombreAdmin !== 'Administrador') {
+            localStorage.setItem('nombreUsuarioActual', nombreAdmin);
+        }
+        var modalAdminEl = document.getElementById('modalAdmin');
+        var m = bootstrap.Modal.getInstance(modalAdminEl);
+        if (m) m.hide();
+        mostrarAlerta('¡Bienvenido, ' + nombreAdmin.split(' ')[0] + '!', 'success');
+        setTimeout(function() {
+            window.location.href = 'pages/dashboard-admin.html';
+        }, 1200);
     }
 
     console.log('Escribe verSesion() para ver los datos de sesión');
