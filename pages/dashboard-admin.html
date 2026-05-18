@@ -668,10 +668,11 @@
                     <input type="text" class="users-search" id="dirSearchInput" placeholder="Buscar por nombre o cargo...">
                     <select class="users-filter" id="dirFilterArea">
                         <option value="">Todas las áreas</option>
-                        <option value="Académico">Académico</option>
                         <option value="Administración">Administración</option>
+                        <option value="Académico">Académico</option>
                         <option value="Servicios">Servicios</option>
-                        <option value="Comunicación">Comunicación</option>
+                        <option value="Dirección">Dirección</option>
+                        <option value="Coordinación">Coordinación</option>
                     </select>
                 </div>
 
@@ -686,6 +687,29 @@
                         </thead>
                         <tbody id="dirTableBody"></tbody>
                     </table>
+                </div>
+
+                <!-- Contactos personales agregados por alumnos -->
+                <div style="margin-top:28px;">
+                    <h3 style="font-size:.95rem;font-weight:700;color:#1e2a5a;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+                        <i class="fas fa-user-friends" style="color:#3b82f6;"></i>
+                        Contactos personales de alumnos
+                        <span id="dirAlumnosCount" style="background:#3b82f6;color:#fff;font-size:.72rem;font-weight:700;border-radius:12px;padding:2px 9px;margin-left:4px;">0</span>
+                    </h3>
+                    <p class="stats-note" style="margin-bottom:10px;"><i class="fas fa-info-circle me-1"></i>
+                        Contactos que los alumnos agregaron en su directorio personal. Solo lectura.
+                    </p>
+                    <div class="dir-table-wrap">
+                        <p id="noDirAlumnosMsg" style="text-align:center;color:#888;padding:16px;display:none;">
+                            Ningún alumno ha agregado contactos personales todavía.
+                        </p>
+                        <table class="users-table" id="dirAlumnosTable">
+                            <thead>
+                                <tr><th>#</th><th>Nombre</th><th>Cargo / Puesto</th><th>Área</th><th>Correo</th><th>Teléfono</th></tr>
+                            </thead>
+                            <tbody id="dirAlumnosTableBody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -712,15 +736,34 @@
                             <div class="adm-form-group">
                                 <label>Área</label>
                                 <select class="adm-input" id="dirArea">
-                                    <option value="Académico">Académico</option>
                                     <option value="Administración">Administración</option>
+                                    <option value="Académico">Académico</option>
                                     <option value="Servicios">Servicios</option>
-                                    <option value="Comunicación">Comunicación</option>
+                                    <option value="Dirección">Dirección</option>
+                                    <option value="Coordinación">Coordinación</option>
                                 </select>
                             </div>
                             <div class="adm-form-group">
                                 <label>Correo Institucional</label>
                                 <input type="email" class="adm-input" id="dirCorreo" placeholder="nombre@tec.edu.mx">
+                            </div>
+                        </div>
+                        <div class="adm-form-row">
+                            <div class="adm-form-group" style="flex:1;">
+                                <label>Carrera Específica <span style="font-size:.75rem;color:#aaa;font-weight:400;">(opcional)</span></label>
+                                <select class="adm-input" id="dirCarreraEsp">
+                                    <option value="">Sin carrera específica</option>
+                                    <option value="Ingeniería en Gestión Empresarial">Ingeniería en Gestión Empresarial</option>
+                                    <option value="Ingeniería Electromecánica">Ingeniería Electromecánica</option>
+                                    <option value="Ingeniería en Sistemas Computacionales">Ingeniería en Sistemas Computacionales</option>
+                                    <option value="Ingeniería Electrónica">Ingeniería Electrónica</option>
+                                    <option value="Ingeniería Ambiental">Ingeniería Ambiental</option>
+                                    <option value="Ingeniería Industrial">Ingeniería Industrial</option>
+                                    <option value="Ingeniería Química">Ingeniería Química</option>
+                                    <option value="Licenciatura en Administración">Licenciatura en Administración</option>
+                                    <option value="Ingeniería en Inteligencia Artificial">Ingeniería en Inteligencia Artificial</option>
+                                    <option value="Ingeniería en Desarrollo de Aplicaciones">Ingeniería en Desarrollo de Aplicaciones</option>
+                                </select>
                             </div>
                         </div>
                         <div class="adm-form-row">
@@ -1254,15 +1297,40 @@
 
         <section class="admin-panel" id="panel-cafeteria-content">
             <div class="inner-panel-header"><h2><i class="fas fa-utensils me-2"></i>Gestión de Cafetería</h2></div>
-            <div class="inner-panel-body"><div class="redirect-notice">
-                <i class="fas fa-external-link-alt" style="font-size:2.5rem;color:#f97316;margin-bottom:12px;"></i>
-                <h4>Cafetería — Dashboard Principal</h4>
-                <p>Publica y administra el menú del día desde el dashboard principal.</p>
-                <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-                    <a href="dashboard-alumno.html" class="btn-go-dashboard"><i class="fas fa-arrow-right me-2"></i> Abrir Dashboard Principal</a>
-                    <a href="cafeteria-admin.html" class="btn-go-dashboard" style="background:#f97316;"><i class="fas fa-upload me-2"></i> Subir Menú del Día</a>
+            <div class="inner-panel-body">
+                <div class="redirect-notice">
+                    <i class="fas fa-external-link-alt" style="font-size:2.5rem;color:#f97316;margin-bottom:12px;"></i>
+                    <h4>Cafetería — Dashboard Principal</h4>
+                    <p>Publica y administra el menú del día desde el dashboard principal.</p>
+                    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                        <a href="dashboard-alumno.html" class="btn-go-dashboard"><i class="fas fa-arrow-right me-2"></i> Abrir Dashboard Principal</a>
+                        <a href="cafeteria-admin.html" class="btn-go-dashboard" style="background:#f97316;"><i class="fas fa-upload me-2"></i> Subir Menú del Día</a>
+                    </div>
                 </div>
-            </div></div>
+
+                <!-- Opiniones de alumnos y visitantes -->
+                <div style="margin-top:28px;">
+                    <h3 style="font-size:.95rem;font-weight:700;color:#1e2a5a;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+                        <i class="fas fa-comment-alt" style="color:#f97316;"></i>
+                        Opiniones de la Cafetería
+                        <span id="opinionesCount" style="background:#f97316;color:#fff;font-size:.72rem;font-weight:700;border-radius:12px;padding:2px 9px;margin-left:4px;">0</span>
+                    </h3>
+                    <p class="stats-note" style="margin-bottom:10px;"><i class="fas fa-info-circle me-1"></i>
+                        Opiniones enviadas desde la sección "Dar opinión" en cafetería por alumnos y visitantes.
+                    </p>
+                    <div class="dir-table-wrap">
+                        <p id="noOpinionesMsg" style="text-align:center;color:#888;padding:16px;display:none;">
+                            No hay opiniones todavía.
+                        </p>
+                        <table class="users-table" id="opinionesTable">
+                            <thead>
+                                <tr><th>#</th><th>Origen</th><th>Opinión</th><th>Fecha</th></tr>
+                            </thead>
+                            <tbody id="opinionesTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </section>
 
     </div><!-- /.panel-content -->

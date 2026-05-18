@@ -367,12 +367,13 @@ function navegarPanel(panelId) {
 
     if (panelId === 'estadisticas-content')    generarGrafica();
     if (panelId === 'usuarios-content')        cargarTablaUsuarios();
-    if (panelId === 'directorio-content')      cargarTablaDirectorio();
+    if (panelId === 'directorio-content')      { cargarTablaDirectorio(); cargarContactosAlumnos(); }
     if (panelId === 'perfil-admin')            cargarDatosAdmin();
     if (panelId === 'soporte-content')         renderizarReportesSoporte();
     if (panelId === 'notificaciones-content')  cargarPanelNotificaciones();
     if (panelId === 'seguridad-content')       cargarPanelSeguridad();
     if (panelId === 'configuracion-content')   cargarPanelConfiguracion();
+    if (panelId === 'cafeteria-content')       cargarOpinionesCafeteria();
 
     // Registrar en el historial del navegador para que el botón "atrás" funcione internamente
     history.pushState({ panel: panelId }, '', '#' + panelId);
@@ -428,12 +429,13 @@ function _navegarPanelSinHistorial(panelId) {
     }
     if (panelId === 'estadisticas-content')   generarGrafica();
     if (panelId === 'usuarios-content')       cargarTablaUsuarios();
-    if (panelId === 'directorio-content')     cargarTablaDirectorio();
+    if (panelId === 'directorio-content')     { cargarTablaDirectorio(); cargarContactosAlumnos(); }
     if (panelId === 'perfil-admin')           cargarDatosAdmin();
     if (panelId === 'soporte-content')        renderizarReportesSoporte();
     if (panelId === 'notificaciones-content') cargarPanelNotificaciones();
     if (panelId === 'seguridad-content')      cargarPanelSeguridad();
     if (panelId === 'configuracion-content')  cargarPanelConfiguracion();
+    if (panelId === 'cafeteria-content')      cargarOpinionesCafeteria();
 }
 
 // =============================================
@@ -767,8 +769,74 @@ function eliminarUsuario(emailOId, tipo) {
 }
 
 // =============================================
-// GESTIÓN DE DIRECTORIO — CRUD
+// DIRECTORIO — CONTACTOS DE ALUMNOS (solo lectura)
 // =============================================
+function cargarContactosAlumnos() {
+    var alumnoDir = JSON.parse(localStorage.getItem('conoce_tec_directorio') || '[]');
+    var personales = alumnoDir.filter(function(c) { return c.esInstitucional === false; });
+    var body  = document.getElementById('dirAlumnosTableBody');
+    var noMsg = document.getElementById('noDirAlumnosMsg');
+    var count = document.getElementById('dirAlumnosCount');
+    if (!body) return;
+    body.innerHTML = '';
+    if (count) count.textContent = personales.length;
+    if (personales.length === 0) {
+        if (noMsg) noMsg.style.display = 'block';
+        return;
+    }
+    if (noMsg) noMsg.style.display = 'none';
+    personales.forEach(function(c, i) {
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td>' + (i + 1) + '</td>' +
+            '<td>' + (c.nombre || '—') + '</td>' +
+            '<td>' + (c.cargo || c.puesto || '—') + '</td>' +
+            '<td>' + (c.area || '—') + '</td>' +
+            '<td>' + (c.correo || c.email || '—') + '</td>' +
+            '<td>' + (c.celular || c.telefono || '—') + '</td>';
+        body.appendChild(tr);
+    });
+}
+
+// =============================================
+// CAFETERÍA — OPINIONES DE ALUMNOS Y VISITANTES
+// =============================================
+function cargarOpinionesCafeteria() {
+    var opAlumnos   = JSON.parse(localStorage.getItem('cafeteria_opiniones')   || '[]');
+    var opVisitantes= JSON.parse(localStorage.getItem('cafeteria_opiniones_v') || '[]');
+
+    // Combinar y etiquetar origen
+    var todas = [];
+    opAlumnos.forEach(function(o)    { todas.push({ texto: o.texto, fecha: o.fecha, origen: 'Alumno' }); });
+    opVisitantes.forEach(function(o) { todas.push({ texto: o.texto, fecha: o.fecha, origen: 'Visitante' }); });
+    // Ordenar por fecha desc (texto simple, funciona para la mayoría de formatos)
+    todas.sort(function(a, b) { return (b.fecha || '').localeCompare(a.fecha || ''); });
+
+    var body  = document.getElementById('opinionesTableBody');
+    var noMsg = document.getElementById('noOpinionesMsg');
+    var count = document.getElementById('opinionesCount');
+    if (!body) return;
+    body.innerHTML = '';
+    if (count) count.textContent = todas.length;
+    if (todas.length === 0) {
+        if (noMsg) noMsg.style.display = 'block';
+        return;
+    }
+    if (noMsg) noMsg.style.display = 'none';
+    todas.forEach(function(o, i) {
+        var tr = document.createElement('tr');
+        var badgeColor = o.origen === 'Alumno' ? '#3b82f6' : '#10b981';
+        tr.innerHTML = '<td>' + (i + 1) + '</td>' +
+            '<td><span class="task-badge" style="background:' + badgeColor + ';color:#fff;padding:2px 8px;border-radius:10px;font-size:.75rem;">' + o.origen + '</span></td>' +
+            '<td style="max-width:400px;word-break:break-word;">' + (o.texto || '—') + '</td>' +
+            '<td style="white-space:nowrap;">' + (o.fecha || '—') + '</td>';
+        body.appendChild(tr);
+    });
+}
+
+// =============================================
+// GESTIÓN DE DIRECTORIO — SINCRONIZAR AL NAVEGAR
+// =============================================
+
 var DIRECTORIO_ADMIN_KEY = 'contactosTECAdmin';
 
 /**
@@ -852,7 +920,7 @@ function renderizarTablaDirectorio(lista) {
             '<td>' + (c.nombre||'—') + '</td>' +
             '<td>' + tipoBadge + '</td>' +
             '<td>' + (c.cargo||c.puesto||'—') + '</td>' +
-            '<td>' + (c.area||'—') + '</td>' +
+            '<td>' + (c.area||'—') + (c.carreraEsp ? '<br><span style="font-size:.7rem;color:#6b7a90;">' + c.carreraEsp + '</span>' : '') + '</td>' +
             '<td>' + (c.correo||c.email||'—') + '</td>' +
             '<td style="display:flex;gap:4px;align-items:center;">' + acciones + '</td>';
         body.appendChild(tr);
@@ -889,10 +957,14 @@ function abrirModalDir(contacto) {
         document.getElementById('dirCorreo').value          = contacto.correo|| contacto.email || '';
         document.getElementById('dirTelefono').value        = contacto.celular||contacto.telefono||'';
         document.getElementById('dirEspecialidad').value    = (contacto.materias && contacto.materias.join ? contacto.materias.join(', ') : '') || contacto.especialidad || '';
+        var carreraEspEl = document.getElementById('dirCarreraEsp');
+        if (carreraEspEl) carreraEspEl.value = contacto.carreraEsp || '';
     } else {
         if (titulo) titulo.textContent = 'Agregar Personal';
         ['modalDirId','dirNombre','dirCargo','dirCorreo','dirTelefono','dirEspecialidad'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
         document.getElementById('dirArea').value = 'Académico';
+        var carreraEspElNew = document.getElementById('dirCarreraEsp');
+        if (carreraEspElNew) carreraEspElNew.value = '';
     }
     var errEl = document.getElementById('modalDirError');
     if (errEl) errEl.style.display = 'none';
@@ -937,10 +1009,13 @@ function guardarDir() {
         'Posgrado':                                'oliva'
     };
     var colorAdmin = colorPorAreaAdmin[areaSeleccionada] || 'azul';
+    var dirCarreraEspEl = document.getElementById('dirCarreraEsp');
+    var dirCarreraEsp = dirCarreraEspEl ? dirCarreraEspEl.value : '';
     var nuevo = {
         id: id ? parseInt(id) : Date.now(),
         nombre: nombre, cargo: cargo.toUpperCase(), puesto: cargo,
         area: areaSeleccionada,
+        carreraEsp: dirCarreraEsp,
         correo: document.getElementById('dirCorreo').value.trim(),
         email:  document.getElementById('dirCorreo').value.trim(),
         celular: document.getElementById('dirTelefono').value.trim(),
